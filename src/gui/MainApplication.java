@@ -15,7 +15,6 @@ public class MainApplication extends Application {
     public void start(Stage stage) throws Exception {
         GUIController controller = new GUIController();
         controller.beginLoading();
-
         Scene scene = new Scene(controller.beginLoading());
         stage.setScene(scene);
         stage.show();

@@ -1,7 +1,6 @@
 package gui;
 
 import concurrent.QueryExecutor;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -10,38 +9,49 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import sql.connector.DatabaseConnector;
 import sql.queries.Query;
+import sql.queries.QueryProcessor;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
+/**
+ * This class is the controller for the main application window.
+ * It handles the user's interactions with the GUI and updates the GUI.
+ *
+ * @author Enzo Bestetti (K23011872)
+ * @version 2024.03.07
+ */
 @SuppressWarnings("all")
 public class GUIController {
 
-    private Future<ResultSet> queryResult;
-    private Connection conn;
-    private DatabaseConnector connector;
     @FXML
     private DatePicker datePicker;
     @FXML
     private Button queryButton, deriveStatsButton, nextDateButton, previousDateButton, nextRecordButton, previousRecordButton;
     @FXML
     private TextFlow genInfoFlow, gmrFlow, medFlow;
-
+    private Future<ResultSet> queryResult;
     private int indexCurrentlyShowing;
     private ArrayList<CovidData> data;
 
+    /**
+     * Constructor for the GUIController.
+     * It initialises the DatabaseConnector and sets the indexCurrentlyShowing to 0.
+     * The indexCurrentlyShowing is used to keep track of which CovidData object is currently being displayed.
+     * The DatabaseConnector is used to connect to the database to execute queries.
+     */
     public GUIController() {
-        this.connector = new DatabaseConnector();
         this.indexCurrentlyShowing = 0;
     }
 
+    /**
+     * This method is called when the GUI is being loaded.
+     * It loads the main-app.fxml file.
+     *
+     * @return The GridPane that contains the main application window.
+     */
     public Pane beginLoading() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-app.fxml"));
 
@@ -54,80 +64,136 @@ public class GUIController {
         return null;
     }
 
-    public String formattedDate(LocalDate date) {
-        if (date == null) {
-            return LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/YYYY")).toString();
+    /**
+     * This method is called when the user clicks the "Query Database" button.
+     */
+    @FXML
+    private void queryButtonClicked() {
+        queryDatabase("SELECT * FROM covid_london WHERE date = '" + datePicker.getValue() + "' ORDER BY borough");
+        updateGUI(data.get(indexCurrentlyShowing % data.size()));
+    }
+
+    /**
+     * Create a new Query object and process it on a separate thread.
+     */
+    private void queryDatabase(String queryString) {
+        Query testQuery = new Query(queryString);
+        QueryProcessor processor = new QueryProcessor(new QueryExecutor(testQuery));
+        try {
+            processor.executeQuery(); //Query the database
+            data = processor.processQuery(); //Process the result set and create an ArrayList
+            Thread.sleep(100); //Ensure query is fully processed before closing connection
+        } catch (Exception e) {
+            System.out.println("Error fetching result set: " + e.getMessage() + "\n" + e.getStackTrace() + "\n" + e.getCause());
         }
-        return date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")).toString();
+        testQuery.closeConnection();
+    }
+
+    /**
+     * This method is called when the user clicks the "Next" button.
+     * It increments the date by one day and calls the method that will run the query with the new date.
+     */
+    @FXML
+    private void nextDateButtonClicked() {
+        datePicker.setValue(datePicker.getValue().plusDays(1));
+        queryDatabase("SELECT * FROM covid_london WHERE date = '" + datePicker.getValue() + "' ORDER BY borough");
+        updateGUI(data.get(indexCurrentlyShowing % data.size()));
+    }
+
+    /**
+     * This method is called when the user clicks the "Previous" button.
+     * It decrements the date by one day and calls the method that will run the query with the new date.
+     */
+    @FXML
+    private void previousDateButtonClicked() {
+        datePicker.setValue(datePicker.getValue().minusDays(1));
+        queryDatabase("SELECT * FROM covid_london WHERE date = '" + datePicker.getValue() + "' ORDER BY borough");
+        updateGUI(data.get(indexCurrentlyShowing % data.size()));
+    }
+
+    /**
+     * This method is called when the user clicks the "Next Record" button.
+     * It updates the GUI with the data from the new CovidData object,
+     * representing a different borough of London and its Covid-related data.
+     *
+     * @throws NullPointerException if the data list has not been initialised yet
+     * @throws ArithmeticException  if the data list is empty.
+     */
+    @FXML
+    private void nextRecordButtonClicked() throws NullPointerException, ArithmeticException {
+        if (indexCurrentlyShowing == data.size() - 1) {
+            indexCurrentlyShowing = -1;
+        }
+        updateGUI(data.get(++indexCurrentlyShowing % data.size()));
+    }
+
+    /**
+     * This method is called when the user clicks the "Previous Record" button.
+     * It updates the GUI with the data from the new CovidData object,
+     * representing a different borough of London and its Covid-related data.
+     *
+     * @throws NullPointerException if the data list has not been initialised yet.
+     * @throws ArithmeticException  if the data list is empty.
+     */
+    @FXML
+    private void previousRecordButtonClicked() throws NullPointerException, ArithmeticException {
+        if (indexCurrentlyShowing == 0) {
+            indexCurrentlyShowing = data.size();
+        }
+        updateGUI(data.get(--indexCurrentlyShowing % data.size()));
     }
 
     @FXML
-    private void queryButtonClicked() {
-        Query testQuery = new Query("SELECT * FROM covid_london WHERE date = '" + formattedDate(datePicker.getValue()) + "' ORDER BY borough");
-        QueryExecutor executor = new QueryExecutor(testQuery);
+    private void deriveStatsButtonClicked() {
+        Query query = new Query("SELECT sum(total_cases) as total_cases FROM covid_london WHERE date = '" + datePicker.getValue() + "'");
+        QueryExecutor executor = new QueryExecutor(query);
         try {
-            // Thread.sleep(100); - We may need to introduce a delay here if the query is not fast enough.
             queryResult = executor.runQuery();
             ResultSet set = queryResult.get();
-            processQuery(set);
-            Thread.sleep(100); //ensures that the query is processed before the connection is closed
-            testQuery.closeConnection();
+            while (set.next()) {
+                System.out.println("Total cases: " + set.getInt("total_cases"));
+            }
+            query.closeConnection();
         } catch (Exception e) {
             System.out.println("Error fetching result set: " + e.getMessage() + "\n" + e.getStackTrace() + "\n" + e.getCause());
         }
     }
 
-    @FXML
-    private void nextDateButtonClicked() throws NullPointerException {
-        datePicker.setValue(datePicker.getValue().plusDays(1));
-        queryButtonClicked();
-    }
-
-    @FXML
-    private void previousDateButtonClicked() throws NullPointerException {
-        datePicker.setValue(datePicker.getValue().minusDays(1));
-        queryButtonClicked();
-    }
-
-    @FXML
-    private void nextRecordButtonClicked() throws NullPointerException {
-        if (indexCurrentlyShowing == data.size() - 1) {
-            indexCurrentlyShowing = -1;
-
-        }
-
-        Platform.runLater(() -> updateGUI(data.get(++indexCurrentlyShowing % data.size())));
-    }
-
-    @FXML
-    private void previousRecordButtonClicked() throws NullPointerException {
-
-        if (indexCurrentlyShowing == 0) {
-            indexCurrentlyShowing = data.size();
-        }
-
-        Platform.runLater(() -> updateGUI(data.get(--indexCurrentlyShowing % data.size())));
-    }
-
-    private void processQuery(ResultSet set) throws SQLException {
-        data = new ArrayList<>();
-        while (set.next()) {
-            data.add(new CovidData(set.getString("date"), set.getString("borough"), set.getInt("retail_and_recreation"),
-                    set.getInt("grocery_and_pharmacy"), set.getInt("parks"), set.getInt("transit_stations"),
-                    set.getInt("workplaces"), set.getInt("residential"), set.getInt("new_cases"),
-                    set.getInt("total_cases"), set.getInt("new_deaths"), set.getInt("total_deaths")));
-        }
-        Platform.runLater(() -> updateGUI(data.get(indexCurrentlyShowing % data.size())));
-    }
-
+    /**
+     * This method is called to update the GUI with the data from a CovidData object.
+     * It updates the general information, the Google Mobility Report information and the medical information.
+     * It also updates the indexCurrentlyShowing to keep track of which CovidData object is currently being displayed.
+     * This is necessary because the method is called from a different thread.
+     *
+     * @param data The CovidData object to be displayed in the GUI.
+     */
     private void updateGUI(CovidData data) {
-        //Update general information
+        updateGeneralInformation(data);
+        updateGMRInformation(data);
+        updateMedicalInformation(data);
+        indexCurrentlyShowing = this.data.indexOf(data);
+    }
+
+    /**
+     * This method is called to update the GUI with the general information from a CovidData object.
+     * It updates the TextFlow with the borough, total cases and total deaths.
+     *
+     * @param data The CovidData object to be displayed in the GUI.
+     */
+    private void updateGeneralInformation(CovidData data) {
         genInfoFlow.getChildren().clear();
-        genInfoFlow.getChildren().add(new Text("Borough: " + data.getBorough().toString() + "\n"));
+        genInfoFlow.getChildren().add(new Text("Borough: " + data.getBorough() + "\n"));
         genInfoFlow.getChildren().add(new Text("Total Cases: " + data.getTotalCases() + "\n"));
         genInfoFlow.getChildren().add(new Text("Total Deaths: " + data.getTotalDeaths() + "\n"));
+    }
 
-        //Update GMR information
+    /**
+     * This method is called to update the GUI with the Google Mobility Report information from a CovidData object.
+     * It updates the TextFlow with the GMR information for each category.
+     *
+     * @param data The CovidData object to be displayed in the GUI.
+     */
+    private void updateGMRInformation(CovidData data) {
         gmrFlow.getChildren().clear();
         gmrFlow.getChildren().add(new Text("Retail & Recreation: " + data.getRetailRecreationGMR() + "\n"));
         gmrFlow.getChildren().add(new Text("Grocery & Pharmacy: " + data.getGroceryPharmacyGMR() + "\n"));
@@ -135,11 +201,18 @@ public class GUIController {
         gmrFlow.getChildren().add(new Text("Transit Stations: " + data.getTransitGMR() + "\n"));
         gmrFlow.getChildren().add(new Text("Workplaces: " + data.getWorkplacesGMR() + "\n"));
         gmrFlow.getChildren().add(new Text("Residential: " + data.getResidentialGMR() + "\n"));
+    }
 
-        //Update medical information
+    /**
+     * This method is called to update the GUI with the medical information from a CovidData object.
+     * It updates the TextFlow with the new cases and new deaths.
+     *
+     * @param data The CovidData object to be displayed in the GUI.
+     */
+    private void updateMedicalInformation(CovidData data) {
         medFlow.getChildren().clear();
         medFlow.getChildren().add(new Text("New Cases: " + data.getNewCases() + "\n"));
         medFlow.getChildren().add(new Text("New Deaths: " + data.getNewDeaths()));
-
     }
+
 }

@@ -24,58 +24,76 @@
                   GridPane.rowIndex="2" GridPane.rowSpan="2147483647" GridPane.valignment="CENTER"
                   GridPane.vgrow="ALWAYS">
             <children>
-                <DatePicker fx:id="datePicker"/>
+                <DatePicker fx:id="datePicker">
+                    <TilePane.margin>
+                        <Insets/>
+                    </TilePane.margin>
+                </DatePicker>
                 <Label fx:id="datePickerLabel" text="Pick a date"/>
-                <HBox prefHeight="24.0" prefWidth="200.0" spacing="10.0">
+                <HBox fillHeight="false" prefHeight="24.0" prefWidth="200.0" spacing="20.0">
                     <children>
+                        <Button fx:id="previousDateButton" mnemonicParsing="false" onAction="#previousDateButtonClicked"
+                                text="Previous"/>
                         <Button fx:id="nextDateButton" mnemonicParsing="false" onAction="#nextDateButtonClicked"
-                                text="Next"/>
-                        <Button fx:id="previousDateButton" mnemonicParsing="false"
-                                onAction="#previousDateButtonClicked" text="Previous">
+                                text="Next">
                             <HBox.margin>
-                                <Insets left="10.0"/>
+                                <Insets/>
                             </HBox.margin>
                         </Button>
                     </children>
                     <TilePane.margin>
                         <Insets left="50.0" right="5.0" top="5.0"/>
                     </TilePane.margin>
+                    <padding>
+                        <Insets left="10.0" top="10.0"/>
+                    </padding>
                 </HBox>
             </children>
             <padding>
                 <Insets left="10.0"/>
             </padding>
         </TilePane>
-        <TilePane fx:id="buttonPane" hgap="30.0" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
+        <TilePane fx:id="buttonPane" hgap="30.0" prefHeight="200.0" prefWidth="200.0" vgap="15.0" GridPane.rowIndex="2">
             <children>
                 <Button fx:id="queryButton" mnemonicParsing="false" onAction="#queryButtonClicked"
                         text="Query Database"/>
-                <Button fx:id="deriveStatsButton" mnemonicParsing="false" text="Derive Statistics"/>
+                <Button fx:id="deriveStatsButton" mnemonicParsing="false" text="Derive Statistics"
+                        onAction="#deriveStatsButtonClicked"/>
             </children>
             <padding>
                 <Insets top="50.0"/>
             </padding>
             <GridPane.margin>
-                <Insets left="25.0"/>
+                <Insets bottom="50.0" left="50.0"/>
             </GridPane.margin>
         </TilePane>
         <BorderPane fx:id="gmrPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
             <top>
-                <Label fx:id="gmrLabel" text="Google Mobility Report" BorderPane.alignment="CENTER"/>
+                <Label fx:id="gmrLabel" style="-fx-font-weight: bold;" text="Google Mobility Report"
+                       BorderPane.alignment="CENTER"/>
             </top>
             <padding>
                 <Insets top="5.0"/>
             </padding>
             <center>
-                <TextFlow fx:id="gmrFlow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"/>
+                <TextFlow fx:id="gmrFlow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                    <BorderPane.margin>
+                        <Insets top="5.0"/>
+                    </BorderPane.margin>
+                </TextFlow>
             </center>
         </BorderPane>
         <BorderPane fx:id="generalDisplay" prefHeight="200.0" prefWidth="200.0">
             <top>
-                <Label fx:id="generalLabel" text="General Information" BorderPane.alignment="CENTER"/>
+                <Label fx:id="generalLabel" style="-fx-font-weight: bold;" text="General Information"
+                       BorderPane.alignment="CENTER"/>
             </top>
             <center>
-                <TextFlow fx:id="genInfoFlow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"/>
+                <TextFlow fx:id="genInfoFlow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                    <BorderPane.margin>
+                        <Insets top="5.0"/>
+                    </BorderPane.margin>
+                </TextFlow>
             </center>
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
@@ -83,20 +101,29 @@
         </BorderPane>
         <BorderPane fx:id="medPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
             <top>
-                <Label fx:id="medLabel" text="Medical Statistics" BorderPane.alignment="CENTER"/>
+                <Label fx:id="medLabel" style="-fx-font-weight: bold;" text="Medical Statistics"
+                       BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets top="5.0"/>
+                    </padding>
+                </Label>
             </top>
             <center>
-                <TextFlow fx:id="medFlow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"/>
+                <TextFlow fx:id="medFlow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                    <BorderPane.margin>
+                        <Insets top="5.0"/>
+                    </BorderPane.margin>
+                </TextFlow>
             </center>
         </BorderPane>
-        <Button fx:id="previousRecordButton" mnemonicParsing="false" text="Previous Record" GridPane.rowIndex="1"
-                onAction="#previousRecordButtonClicked">
+        <Button fx:id="previousRecordButton" mnemonicParsing="false" onAction="#previousRecordButtonClicked"
+                text="Previous Record" GridPane.rowIndex="1">
             <GridPane.margin>
-                <Insets left="70.0"/>
+                <Insets left="50.0"/>
             </GridPane.margin>
         </Button>
-        <Button fx:id="nextRecordButton" mnemonicParsing="false" text="Next Record" GridPane.columnIndex="2"
-                GridPane.rowIndex="1" onAction="#nextRecordButtonClicked">
+        <Button fx:id="nextRecordButton" mnemonicParsing="false" onAction="#nextRecordButtonClicked" text="Next Record"
+                GridPane.columnIndex="2" GridPane.rowIndex="1">
             <GridPane.margin>
                 <Insets left="70.0"/>
             </GridPane.margin>
