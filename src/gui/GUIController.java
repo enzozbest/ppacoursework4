@@ -13,6 +13,7 @@ import sql.queries.Query;
 import sql.queries.QueryProcessor;
 
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
 
@@ -69,6 +70,7 @@ public class GUIController {
      */
     @FXML
     private void queryButtonClicked() {
+        ensureDateNotNull();
         queryDatabase("SELECT * FROM covid_london WHERE date = '" + datePicker.getValue() + "' ORDER BY borough");
         updateGUI(data.get(indexCurrentlyShowing % data.size()));
     }
@@ -95,6 +97,7 @@ public class GUIController {
      */
     @FXML
     private void nextDateButtonClicked() {
+        ensureDateNotNull();
         datePicker.setValue(datePicker.getValue().plusDays(1));
         queryDatabase("SELECT * FROM covid_london WHERE date = '" + datePicker.getValue() + "' ORDER BY borough");
         updateGUI(data.get(indexCurrentlyShowing % data.size()));
@@ -106,6 +109,7 @@ public class GUIController {
      */
     @FXML
     private void previousDateButtonClicked() {
+        ensureDateNotNull();
         datePicker.setValue(datePicker.getValue().minusDays(1));
         queryDatabase("SELECT * FROM covid_london WHERE date = '" + datePicker.getValue() + "' ORDER BY borough");
         updateGUI(data.get(indexCurrentlyShowing % data.size()));
@@ -121,7 +125,7 @@ public class GUIController {
      */
     @FXML
     private void nextRecordButtonClicked() throws NullPointerException, ArithmeticException {
-        if (indexCurrentlyShowing == data.size() - 1) {
+        if (indexCurrentlyShowing >= data.size() - 1) {
             indexCurrentlyShowing = -1;
         }
         updateGUI(data.get(++indexCurrentlyShowing % data.size()));
@@ -137,7 +141,7 @@ public class GUIController {
      */
     @FXML
     private void previousRecordButtonClicked() throws NullPointerException, ArithmeticException {
-        if (indexCurrentlyShowing == 0) {
+        if (indexCurrentlyShowing <= 0) {
             indexCurrentlyShowing = data.size();
         }
         updateGUI(data.get(--indexCurrentlyShowing % data.size()));
@@ -182,9 +186,10 @@ public class GUIController {
      */
     private void updateGeneralInformation(CovidData data) {
         genInfoFlow.getChildren().clear();
-        genInfoFlow.getChildren().add(new Text("Borough: " + data.getBorough() + "\n"));
-        genInfoFlow.getChildren().add(new Text("Total Cases: " + data.getTotalCases() + "\n"));
-        genInfoFlow.getChildren().add(new Text("Total Deaths: " + data.getTotalDeaths() + "\n"));
+        genInfoFlow.getChildren().add(new Text("Borough: " + data.borough() + "\n"));
+        genInfoFlow.getChildren().add(new Text("Total Cases: " + data.totalCases() + "\n"));
+        delayUpdate(10);
+        genInfoFlow.getChildren().add(new Text("Total Deaths: " + data.totalDeaths() + "\n"));
     }
 
     /**
@@ -195,12 +200,12 @@ public class GUIController {
      */
     private void updateGMRInformation(CovidData data) {
         gmrFlow.getChildren().clear();
-        gmrFlow.getChildren().add(new Text("Retail & Recreation: " + data.getRetailRecreationGMR() + "\n"));
-        gmrFlow.getChildren().add(new Text("Grocery & Pharmacy: " + data.getGroceryPharmacyGMR() + "\n"));
-        gmrFlow.getChildren().add(new Text("Parks: " + data.getParksGMR() + "\n"));
-        gmrFlow.getChildren().add(new Text("Transit Stations: " + data.getTransitGMR() + "\n"));
-        gmrFlow.getChildren().add(new Text("Workplaces: " + data.getWorkplacesGMR() + "\n"));
-        gmrFlow.getChildren().add(new Text("Residential: " + data.getResidentialGMR() + "\n"));
+        gmrFlow.getChildren().add(new Text("Retail & Recreation: " + data.retailAndRecreation() + "\n"));
+        gmrFlow.getChildren().add(new Text("Grocery & Pharmacy: " + data.groceryAndPharmacy() + "\n"));
+        gmrFlow.getChildren().add(new Text("Parks: " + data.parks() + "\n"));
+        gmrFlow.getChildren().add(new Text("Transit Stations: " + data.transitStations() + "\n"));
+        gmrFlow.getChildren().add(new Text("Workplaces: " + data.workplaces() + "\n"));
+        gmrFlow.getChildren().add(new Text("Residential: " + data.residential() + "\n"));
     }
 
     /**
@@ -211,8 +216,22 @@ public class GUIController {
      */
     private void updateMedicalInformation(CovidData data) {
         medFlow.getChildren().clear();
-        medFlow.getChildren().add(new Text("New Cases: " + data.getNewCases() + "\n"));
-        medFlow.getChildren().add(new Text("New Deaths: " + data.getNewDeaths()));
+        medFlow.getChildren().add(new Text("New Cases: " + data.newCases() + "\n"));
+        medFlow.getChildren().add(new Text("New Deaths: " + data.newDeaths()));
+    }
+
+    private void delayUpdate(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void ensureDateNotNull() {
+        if (datePicker.getValue() == null) {
+            datePicker.setValue(LocalDate.now());
+        }
     }
 
 }
