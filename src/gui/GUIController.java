@@ -1,6 +1,5 @@
 package gui;
 
-import concurrent.QueryExecutor;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -10,9 +9,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import sql.queries.Query;
-import sql.queries.QueryProcessor;
+import sql.queries.concurrent.QueryExecutor;
+import sql.queries.processors.RecordGenerator;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.concurrent.Future;
@@ -62,6 +63,7 @@ public class GUIController {
         } catch (Exception e) {
             System.out.println(e.getMessage() + e.getStackTrace() + e.getCause());
         }
+
         return null;
     }
 
@@ -73,22 +75,24 @@ public class GUIController {
         ensureDateNotNull();
         queryDatabase("SELECT * FROM covid_london WHERE date = '" + datePicker.getValue() + "' ORDER BY borough");
         updateGUI(data.get(indexCurrentlyShowing % data.size()));
+        //deriveStatsButtonClicked();
     }
 
     /**
      * Create a new Query object and process it on a separate thread.
      */
     private void queryDatabase(String queryString) {
-        Query testQuery = new Query(queryString);
-        QueryProcessor processor = new QueryProcessor(new QueryExecutor(testQuery));
+        Query query = new Query(queryString);
+        RecordGenerator processor = new RecordGenerator(new QueryExecutor(query));
         try {
             processor.executeQuery(); //Query the database
             data = processor.processQuery(); //Process the result set and create an ArrayList
             Thread.sleep(100); //Ensure query is fully processed before closing connection
-        } catch (Exception e) {
+        } catch (SQLException | InterruptedException e) {
             System.out.println("Error fetching result set: " + e.getMessage() + "\n" + e.getStackTrace() + "\n" + e.getCause());
+        } finally {
+            query.closeConnection();
         }
-        testQuery.closeConnection();
     }
 
     /**
@@ -125,10 +129,7 @@ public class GUIController {
      */
     @FXML
     private void nextRecordButtonClicked() throws NullPointerException, ArithmeticException {
-        if (indexCurrentlyShowing >= data.size() - 1) {
-            indexCurrentlyShowing = -1;
-        }
-        updateGUI(data.get(++indexCurrentlyShowing % data.size()));
+        updateGUI(data.get((++indexCurrentlyShowing + data.size()) % data.size()));
     }
 
     /**
@@ -141,10 +142,7 @@ public class GUIController {
      */
     @FXML
     private void previousRecordButtonClicked() throws NullPointerException, ArithmeticException {
-        if (indexCurrentlyShowing <= 0) {
-            indexCurrentlyShowing = data.size();
-        }
-        updateGUI(data.get(--indexCurrentlyShowing % data.size()));
+        updateGUI(data.get((--indexCurrentlyShowing + data.size()) % data.size()));
     }
 
     @FXML
@@ -233,5 +231,4 @@ public class GUIController {
             datePicker.setValue(LocalDate.now());
         }
     }
-
 }

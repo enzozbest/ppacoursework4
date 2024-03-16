@@ -22,7 +22,6 @@ import java.sql.SQLException;
 public class Query {
 
     private final String queryString;
-    private final DatabaseConnector connector;
     private Connection conn;
 
     /**
@@ -32,7 +31,6 @@ public class Query {
      */
     public Query(String queryString) {
         this.queryString = queryString;
-        this.connector = new DatabaseConnector();
     }
 
     /**
@@ -41,7 +39,7 @@ public class Query {
     public void closeConnection() {
         try {
             conn.close();
-            System.out.println("Connection to the database successfully closed.");
+            // System.out.println("Connection to the database successfully closed.");
         } catch (SQLException e) {
             System.out.println("Error closing connection: " + e.getMessage() + "\n" + e.getStackTrace() + "\n" + e.getCause());
         }
@@ -54,6 +52,7 @@ public class Query {
      */
     public PreparedStatement getStatement() {
         openConnection();
+        System.out.println("Connecting to the database...");
         try {
             return conn.prepareStatement(queryString);
         } catch (SQLException e) {
@@ -66,7 +65,7 @@ public class Query {
      * Open a connection to the database using a DatabaseConnector object.
      */
     private void openConnection() {
-        conn = connector.connect();
+        conn = DatabaseConnector.connect();
     }
 }
 
