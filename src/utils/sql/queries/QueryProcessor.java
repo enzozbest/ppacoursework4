@@ -1,7 +1,7 @@
-package sql.queries;
+package utils.sql.queries;
 
-import concurrent.QueryExecutor;
-import gui.CovidData;
+import utils.sql.queries.concurrent.QueryExecutor;
+import utils.CovidData;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

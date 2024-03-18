@@ -1,4 +1,4 @@
-package gui;
+package utils;
 
 /**
  * This record class represents one record in the COVID dataset.

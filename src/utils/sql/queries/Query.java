@@ -1,6 +1,6 @@
-package sql.queries;
+package utils.sql.queries;
 
-import sql.connector.DatabaseConnector;
+import utils.sql.connector.DatabaseConnector;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

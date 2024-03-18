@@ -1,5 +1,6 @@
-package gui;
+package gui.controllers;
 
+import utils.CovidData;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -8,14 +9,18 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import sql.queries.Query;
-import sql.queries.concurrent.QueryExecutor;
-import sql.queries.processors.RecordGenerator;
+import utils.sql.queries.Query;
+import utils.sql.queries.concurrent.QueryExecutor;
+import utils.sql.queries.processors.RecordGenerator;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.concurrent.Future;
 
 /**
@@ -26,7 +31,7 @@ import java.util.concurrent.Future;
  * @version 2024.03.07
  */
 @SuppressWarnings("all")
-public class GUIController {
+public class ProvisionalController {
 
     @FXML
     private DatePicker datePicker;
@@ -44,7 +49,7 @@ public class GUIController {
      * The indexCurrentlyShowing is used to keep track of which CovidData object is currently being displayed.
      * The DatabaseConnector is used to connect to the database to execute queries.
      */
-    public GUIController() {
+    public ProvisionalController() {
         this.indexCurrentlyShowing = 0;
     }
 
@@ -55,6 +60,7 @@ public class GUIController {
      * @return The GridPane that contains the main application window.
      */
     public Pane beginLoading() {
+
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-app.fxml"));
 
         try {
