@@ -1,42 +1,45 @@
 package gui.controllers;
 
-import utils.CovidData;
+import gui.components.BarChartPlotter;
+import gui.components.LinePlotter;
+import gui.components.Plotter;
+import gui.components.ScatterPlotter;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import utils.CovidData;
 import utils.sql.queries.Query;
 import utils.sql.queries.concurrent.QueryExecutor;
 import utils.sql.queries.processors.RecordGenerator;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.ResourceBundle;
 import java.util.concurrent.Future;
 
 /**
- * This class is the controller for the main application window.
- * It handles the user's interactions with the GUI and updates the GUI.
+ * This class is the controller for the control panel window. This window displays general control structures that are
+ * used to test the functionality of the application. It is not the final version of the application's GUI, but it is
+ * used to test the functionality of the application's backend and the database connection.
  *
  * @author Enzo Bestetti (K23011872)
- * @version 2024.03.07
+ * @version 2024.03.18
  */
 @SuppressWarnings("all")
-public class ProvisionalController {
+public class ControlPanelController {
 
     @FXML
     private DatePicker datePicker;
     @FXML
-    private Button queryButton, deriveStatsButton, nextDateButton, previousDateButton, nextRecordButton, previousRecordButton;
+    private Button queryButton, lineButton, nextDateButton, previousDateButton, nextRecordButton, previousRecordButton;
     @FXML
     private TextFlow genInfoFlow, gmrFlow, medFlow;
     private Future<ResultSet> queryResult;
@@ -49,19 +52,19 @@ public class ProvisionalController {
      * The indexCurrentlyShowing is used to keep track of which CovidData object is currently being displayed.
      * The DatabaseConnector is used to connect to the database to execute queries.
      */
-    public ProvisionalController() {
+    public ControlPanelController() {
         this.indexCurrentlyShowing = 0;
     }
 
     /**
      * This method is called when the GUI is being loaded.
-     * It loads the main-app.fxml file.
+     * It loads the control-panel.fxml file.
      *
      * @return The GridPane that contains the main application window.
      */
     public Pane beginLoading() {
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-app.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/control-panel.fxml"));
 
         try {
             GridPane pane = fxmlLoader.load();
@@ -151,20 +154,57 @@ public class ProvisionalController {
         updateGUI(data.get((--indexCurrentlyShowing + data.size()) % data.size()));
     }
 
+    /**
+     * This method is called when the user clicks the "Line Chart" button.
+     * It creates a new PlotController and a new LinePlotter to display the data in a line chart.
+     * The line chart will display the total cases for the borough over time.
+     * The data will be displayed for the last 180 days before and after the date selected by the user.
+     * The line chart will be displayed in a new window.
+     */
     @FXML
-    private void deriveStatsButtonClicked() {
-        Query query = new Query("SELECT sum(total_cases) as total_cases FROM covid_london WHERE date = '" + datePicker.getValue() + "'");
-        QueryExecutor executor = new QueryExecutor(query);
-        try {
-            queryResult = executor.runQuery();
-            ResultSet set = queryResult.get();
-            while (set.next()) {
-                System.out.println("Total cases: " + set.getInt("total_cases"));
-            }
-            query.closeConnection();
-        } catch (Exception e) {
-            System.out.println("Error fetching result set: " + e.getMessage() + "\n" + e.getStackTrace() + "\n" + e.getCause());
-        }
+    private void lineButtonClicked() {
+        PlotController lineController = new PlotController("SELECT `date`, MONTH(`date`) AS month, total_cases, "
+                + "borough FROM covid_london WHERE borough='"
+                + data.get(indexCurrentlyShowing).borough() + "' "
+                + "AND `date` BETWEEN '" + datePicker.getValue().minusDays(180) + "' AND '"
+                + datePicker.getValue().plusDays(180) + "' GROUP BY MONTH(`date`) ORDER BY `date`;");
+
+        Plotter linePlotter = new LinePlotter("Greenwich over Time", new CategoryAxis(), "Date",
+                new NumberAxis(), "Total cases");
+
+        lineController.showGraph(linePlotter);
+    }
+
+    /**
+     * This method is called when the user clicks the "Bar Chart" button.
+     * It creates a new PlotController and a new BarChartPlotter to display the data in a bar chart.
+     * The bar chart will display the total cases for each borough on the date selected by the user.
+     * The bar chart will be displayed in a new window.
+     */
+    @FXML
+    private void barChartButtonClicked() {
+        PlotController bcController = new PlotController("SELECT borough, total_cases FROM covid_london WHERE date='" + datePicker.getValue() + "' GROUP BY borough;");
+
+        Plotter bcPlotter = new BarChartPlotter("Boroughs on this day", new CategoryAxis(), "Boroughs", new NumberAxis(), "Number of Cases");
+
+        bcController.showGraph(bcPlotter);
+    }
+
+    /**
+     * This method is called when the user clicks the "Scatter Chart" button.
+     * It creates a new PlotController and a new ScatterPlotter to display the data in a scatter chart.
+     * The scatter chart will display the total cases for the borough over time.
+     * The data will be displayed for the last 180 days before and after the date selected by the user.
+     * The scatter chart will be displayed in a new window.
+     */
+    @FXML
+    private void scatterButtonClicked() {
+        PlotController plotController = new PlotController("SELECT `date`, total_cases FROM covid_london WHERE borough ='" + data.get(indexCurrentlyShowing).borough() + "' AND `date` BETWEEN '" + datePicker.getValue().minusDays(180) + "' AND '" + datePicker.getValue().plusDays(180) + "' ORDER BY `date`;");
+        Plotter sPlotter = new ScatterPlotter("CV-19 Boroughs", new CategoryAxis(), "Boroughs", new NumberAxis(), "Number of Cases");
+        sPlotter.setData(plotController.getData());
+
+        plotController.showGraph(sPlotter);
+
     }
 
     /**
@@ -224,6 +264,11 @@ public class ProvisionalController {
         medFlow.getChildren().add(new Text("New Deaths: " + data.newDeaths()));
     }
 
+    /**
+     * Introduce a delay by sleeping the thread for a given number of milliseconds.
+     *
+     * @param millis The number of milliseconds to sleep the thread for.
+     */
     private void delayUpdate(int millis) {
         try {
             Thread.sleep(millis);
@@ -232,6 +277,9 @@ public class ProvisionalController {
         }
     }
 
+    /**
+     * Ensure that the date picker does not return a null value.
+     */
     private void ensureDateNotNull() {
         if (datePicker.getValue() == null) {
             datePicker.setValue(LocalDate.now());

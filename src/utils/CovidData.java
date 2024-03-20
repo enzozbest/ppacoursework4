@@ -13,3 +13,4 @@ public record CovidData(String date, String borough, int retailAndRecreation, in
                         int transitStations, int workplaces, int residential, int newCases, int totalCases,
                         int newDeaths, int totalDeaths) {
 }
+

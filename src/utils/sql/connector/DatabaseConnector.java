@@ -14,5 +14,7 @@ public class DatabaseConnector {
             System.out.println("Error: " + e.getMessage() + "\n Could not connect to the database.");
         }
         return conn;
+
+
     }
 }

@@ -1,7 +1,7 @@
 package utils.sql.queries;
 
-import utils.sql.queries.concurrent.QueryExecutor;
 import utils.CovidData;
+import utils.sql.queries.concurrent.QueryExecutor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Future;
 
 public class QueryProcessor {
+
 
     private final QueryExecutor executor;
     private ResultSet resultSet;

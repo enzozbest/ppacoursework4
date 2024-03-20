@@ -21,6 +21,7 @@ import java.sql.SQLException;
  */
 public class Query {
 
+
     private final String queryString;
     private Connection conn;
 
