@@ -1,11 +1,15 @@
 package gui.controllers;
 
+import gui.ImageLoader;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -28,8 +32,8 @@ import java.time.LocalDate;
 @SuppressWarnings({"unused", "unchecked"})
 public class WelcomeController extends AbstractController {
 
+    private final BooleanProperty isValidDateRange;
     private AnchorPane parent;
-
     @FXML
     private ImageView welcomeBackdrop, guiTitle, guiSubtitle, guiCharacter;
     @FXML
@@ -44,6 +48,7 @@ public class WelcomeController extends AbstractController {
      */
     public WelcomeController() {
         super("SELECT DISTINCT `date` FROM covid_london ORDER BY `date` ASC");
+        isValidDateRange = new SimpleBooleanProperty();
     }
 
 
@@ -66,31 +71,41 @@ public class WelcomeController extends AbstractController {
 
         try {
             parent = loader.load();
+            parent.getStylesheets().add(getClass().getResource("../styles/default.css").toExternalForm());
         } catch (IOException e) {
             System.out.println("Error loading welcome-screen.fxml \n" + e.getMessage() + "\n" + e.getCause() + "\n" + e.getStackTrace());
         }
 
-        addListeners();
+        isValidDateRange.set(false);
 
+        addListeners();
         setAvailableDates();
         setWelcomeBackdrop();
-
-        /* Uncomment when assets available
-        setWelcomeBackdrop();
         setGuiTitle();
-        setGuiCharacter();*/
-
+        setGuiSubtitle();
+        setGuiCharacter();
     }
 
     /**
-     * Method to add listeners to the ListViews.
+     * Method to add listeners to components of the GUI.
      * <p>
-     * This method adds listeners to the ListViews for the user to select the start and end dates from.
-     * The listeners call the validateDates() method to ensure that the selected date range is valid.
+     * This method adds listeners to eac <em>ComboBox</em> to watch for when the user selects the start and end dates from.
+     * These listeners call the validateDates() method to ensure that the selected date range is valid.
+     * <p>
+     * The isValidDateRange listener is added to the isValidDateRange property to change the subtitle image when the
+     * date range is valid or invalid.
      */
     private void addListeners() {
         from.valueProperty().addListener((observableValue, oldValue, newValue) -> validateDates());
         to.valueProperty().addListener((observableValue, oldValue, newValue) -> validateDates());
+
+        isValidDateRange.addListener((observableValue, oldValue, newValue) -> {
+            if (newValue) {
+                guiSubtitle.setImage(ImageLoader.SUBTITLE2);
+            } else {
+                guiSubtitle.setImage(ImageLoader.SUBTITLE1);
+            }
+        });
     }
 
     /**
@@ -105,13 +120,63 @@ public class WelcomeController extends AbstractController {
         if (from.getValue() == null || to.getValue() == null) {
             return;
         }
-
         LocalDate fromDate = formatDate(from.getValue().toString());
         LocalDate toDate = formatDate(to.getValue().toString());
 
         if (!(fromDate.isBefore(toDate) || fromDate.equals(toDate))) {
             errorMessage.setVisible(true);
+            isValidDateRange.set(false);
+            setStyleClass("clickable", false);
+            setMouseEvents(false);
+            return;
         }
+        isValidDateRange.set(true);
+        setStyleClass("clickable", true);
+        setMouseEvents(true);
+    }
+
+    /**
+     * Method to set the style class for the subtitle.
+     * <p>
+     * This method sets the style class for the subtitle by adding or removing the specified class from the subtitle.
+     * This is used to change the appearance of the subtitle when the date range is valid or invalid.
+     *
+     * @param className The name of the style class to add or remove
+     * @param setting   Whether to add or remove the style class
+     */
+    private void setStyleClass(String className, boolean setting) {
+        if (setting) {
+            guiSubtitle.getStyleClass().add(className);
+            return;
+        }
+        guiSubtitle.getStyleClass().remove(className);
+    }
+
+    /**
+     * Method to set the mouse events for the subtitle.
+     * <p>
+     * This method sets the mouse events for the subtitle by adding or removing the specified events from the subtitle.
+     * This is used to change the behaviour of the subtitle when the date range is valid or invalid.
+     *
+     * @param setting Whether to add or remove the mouse events
+     */
+    private void setMouseEvents(boolean setting) {
+        if (setting) {
+            guiSubtitle.setOnMouseEntered(mouseEvent -> guiSubtitle.setImage(ImageLoader.SUBTITLE3));
+            guiSubtitle.setOnMouseExited(mouseEvent -> guiSubtitle.setImage(ImageLoader.SUBTITLE2));
+            guiSubtitle.setOnMouseClicked(mouseEvent -> {
+                MapController mapController = new MapController();
+                mapController.beginLoading();
+                mapController.showMapFrame();
+            });
+            return;
+        }
+        guiSubtitle.setOnMouseEntered(mouseEvent -> {
+        });
+        guiSubtitle.setOnMouseExited(mouseEvent -> {
+        });
+        guiSubtitle.setOnMouseClicked(mouseEvent -> {
+        });
     }
 
     /**
@@ -144,7 +209,8 @@ public class WelcomeController extends AbstractController {
                 to.getItems().add(date);
             }
         } catch (SQLException e) {
-            System.out.println("Error getting available dates \n" + e.getMessage() + "\n" + e.getCause() + "\n" + e.getStackTrace());
+            System.out.println("Error getting available dates \n" + e.getMessage() + "\n" + e.getCause() + "\n" +
+                    e.getStackTrace());
         }
     }
 
@@ -156,12 +222,11 @@ public class WelcomeController extends AbstractController {
      */
     private void setWelcomeBackdrop() {
 
-        Image backdrop = new Image("backdrop.jpeg"); //placeholder image
-        welcomeBackdrop.setImage(backdrop);
+        welcomeBackdrop.setImage(ImageLoader.BACKDROP);
 
         welcomeBackdrop.setFitWidth(960);
         welcomeBackdrop.setFitHeight(600);
-        welcomeBackdrop.setPreserveRatio(true);
+        welcomeBackdrop.setPreserveRatio(false);
         welcomeBackdrop.setVisible(true);
     }
 
@@ -172,11 +237,48 @@ public class WelcomeController extends AbstractController {
      * The title is then added to the screen as an ImageView.
      */
     private void setGuiTitle() {
-        guiTitle = new ImageView("file:src/resources/images/gui-title.png"); //doesnt exist yet!
+        guiTitle.setImage(ImageLoader.TITLE); //doesnt exist yet!
 
-        guiTitle.setFitWidth(500);
-        guiTitle.setFitHeight(100);
+        guiTitle.setFitWidth(440);
+        guiTitle.setFitHeight(180);
         guiTitle.setPreserveRatio(false);
+
+    }
+
+    /**
+     * Method to set the subtitle for the welcome screen.
+     * <p>
+     * This method sets the subtitle for the welcome screen by loading the subtitle image from the resources folder.
+     * The subtitle is then added to the screen as an ImageView.
+     * A new thread is created to animate the subtitle by changing the brightness of the image without blocking the main
+     * GUI. This animation translates to a flashing text effect, characteristic of old-style video games.
+     */
+    private void setGuiSubtitle() {
+        guiSubtitle.setImage(ImageLoader.SUBTITLE1);
+
+        guiSubtitle.setFitWidth(440);
+        guiSubtitle.setFitHeight(150);
+
+        new Thread(() -> {
+            ColorAdjust colorAdjust = new ColorAdjust();
+            float delta = -1f / 24;
+            float brightness = 1f;
+
+            colorAdjust.setBrightness(brightness);
+            guiSubtitle.setEffect(colorAdjust);
+            while (true) {
+                for (int i = 0; i < 24; i++) {
+                    brightness += delta;
+                    colorAdjust.setBrightness(brightness);
+                    Platform.runLater(() -> guiSubtitle.setEffect(colorAdjust));
+                    try {
+                        Thread.sleep(42);
+                    } catch (InterruptedException e) {
+                    }
+                }
+                delta *= -1;
+            }
+        }).start();
     }
 
     /**
@@ -186,10 +288,10 @@ public class WelcomeController extends AbstractController {
      * The character is then added to the screen as an ImageView.
      */
     private void setGuiCharacter() {
-        guiCharacter = new ImageView("file:src/resources/images/gui-character.png"); //doesnt exist yet!
+        guiCharacter.setImage(ImageLoader.CHARACTER);
 
-        guiCharacter.setFitWidth(500);
-        guiCharacter.setFitHeight(500);
+        guiCharacter.setFitWidth(320);
+        guiCharacter.setFitHeight(350);
         guiCharacter.setPreserveRatio(false);
     }
 
