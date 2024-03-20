@@ -15,7 +15,7 @@ import javafx.stage.Stage;
  * @version 2024.03.20
  */
 @SuppressWarnings("all")
-public class MainApplication extends Application {
+public class EpiQuest extends Application {
 
     private Stage stage;
 
