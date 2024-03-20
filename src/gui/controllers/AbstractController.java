@@ -41,6 +41,7 @@ public abstract class AbstractController {
 
     public abstract void beginLoading();
 
+
     /**
      * Method to query the database.
      */

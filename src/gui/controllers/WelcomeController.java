@@ -1,14 +1,14 @@
 package gui.controllers;
 
-import gui.ImageLoader;
+import gui.components.ImageLoader;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -36,8 +36,6 @@ public class WelcomeController extends AbstractController {
     private AnchorPane parent;
     @FXML
     private ImageView welcomeBackdrop, guiTitle, guiSubtitle, guiCharacter;
-    @FXML
-    private Label errorMessage;
     @FXML
     private StackPane stackPane;
     @FXML
@@ -79,10 +77,15 @@ public class WelcomeController extends AbstractController {
         isValidDateRange.set(false);
 
         addListeners();
+
         setAvailableDates();
+
         setWelcomeBackdrop();
+
         setGuiTitle();
+
         setGuiSubtitle();
+
         setGuiCharacter();
     }
 
@@ -96,14 +99,14 @@ public class WelcomeController extends AbstractController {
      * date range is valid or invalid.
      */
     private void addListeners() {
-        from.valueProperty().addListener((observableValue, oldValue, newValue) -> validateDates());
-        to.valueProperty().addListener((observableValue, oldValue, newValue) -> validateDates());
+        from.valueProperty().addListener((observableValue, oldValue, newValue) -> setInteractiveElements());
+        to.valueProperty().addListener((observableValue, oldValue, newValue) -> setInteractiveElements());
 
         isValidDateRange.addListener((observableValue, oldValue, newValue) -> {
             if (newValue) {
-                guiSubtitle.setImage(ImageLoader.SUBTITLE2);
+                guiSubtitle.setImage(ImageLoader.PRESS_TO_START);
             } else {
-                guiSubtitle.setImage(ImageLoader.SUBTITLE1);
+                guiSubtitle.setImage(ImageLoader.ENTER_DATE_RANGE);
             }
         });
     }
@@ -114,9 +117,11 @@ public class WelcomeController extends AbstractController {
      * This method validates the selected dates by checking if the start date is before the end date.
      * If the start date is after the end date, an error message is displayed to the user on the screen.
      * When the user corrects the dates, the error message is hidden.
+     * <p>
+     * Upon validation, the isValidDateRange property is set to true or false, and the style class and mouse events
+     * for the subtitle are set accordingly.
      */
-    private void validateDates() {
-        errorMessage.setVisible(false);
+    private void setInteractiveElements() {
         if (from.getValue() == null || to.getValue() == null) {
             return;
         }
@@ -124,7 +129,6 @@ public class WelcomeController extends AbstractController {
         LocalDate toDate = formatDate(to.getValue().toString());
 
         if (!(fromDate.isBefore(toDate) || fromDate.equals(toDate))) {
-            errorMessage.setVisible(true);
             isValidDateRange.set(false);
             setStyleClass("clickable", false);
             setMouseEvents(false);
@@ -133,6 +137,38 @@ public class WelcomeController extends AbstractController {
         isValidDateRange.set(true);
         setStyleClass("clickable", true);
         setMouseEvents(true);
+    }
+
+    /**
+     * Method to set the mouse events for the subtitle.
+     * <p>
+     * This method sets the mouse events for the subtitle by adding or removing the specified events from the subtitle.
+     * This is used to change the behaviour of the subtitle when the date range is valid or invalid.
+     *
+     * @param setting Whether to add or remove the mouse events
+     */
+    private void setMouseEvents(boolean setting) {
+        if (setting) {
+            guiSubtitle.setOnMouseEntered(mouseEvent -> guiSubtitle.setImage(ImageLoader.PRESS_TO_START));
+            guiSubtitle.setOnMouseExited(mouseEvent -> guiSubtitle.setImage(ImageLoader.PRESS_TO_START));
+            guiSubtitle.setOnMouseClicked(mouseEvent -> {
+
+
+                Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
+
+                MapController mapController = new MapController();
+                mapController.beginLoading();
+
+                stage.setScene(mapController.getMapFrame());
+            });
+            return;
+        }
+        guiSubtitle.setOnMouseEntered(mouseEvent -> {
+        });
+        guiSubtitle.setOnMouseExited(mouseEvent -> {
+        });
+        guiSubtitle.setOnMouseClicked(mouseEvent -> {
+        });
     }
 
     /**
@@ -152,32 +188,6 @@ public class WelcomeController extends AbstractController {
         guiSubtitle.getStyleClass().remove(className);
     }
 
-    /**
-     * Method to set the mouse events for the subtitle.
-     * <p>
-     * This method sets the mouse events for the subtitle by adding or removing the specified events from the subtitle.
-     * This is used to change the behaviour of the subtitle when the date range is valid or invalid.
-     *
-     * @param setting Whether to add or remove the mouse events
-     */
-    private void setMouseEvents(boolean setting) {
-        if (setting) {
-            guiSubtitle.setOnMouseEntered(mouseEvent -> guiSubtitle.setImage(ImageLoader.SUBTITLE3));
-            guiSubtitle.setOnMouseExited(mouseEvent -> guiSubtitle.setImage(ImageLoader.SUBTITLE2));
-            guiSubtitle.setOnMouseClicked(mouseEvent -> {
-                MapController mapController = new MapController();
-                mapController.beginLoading();
-                mapController.showMapFrame();
-            });
-            return;
-        }
-        guiSubtitle.setOnMouseEntered(mouseEvent -> {
-        });
-        guiSubtitle.setOnMouseExited(mouseEvent -> {
-        });
-        guiSubtitle.setOnMouseClicked(mouseEvent -> {
-        });
-    }
 
     /**
      * Method to format the date.
@@ -239,8 +249,8 @@ public class WelcomeController extends AbstractController {
     private void setGuiTitle() {
         guiTitle.setImage(ImageLoader.TITLE); //doesnt exist yet!
 
-        guiTitle.setFitWidth(440);
-        guiTitle.setFitHeight(180);
+        guiTitle.setFitWidth(960);
+        guiTitle.setFitHeight(600);
         guiTitle.setPreserveRatio(false);
 
     }
@@ -254,15 +264,15 @@ public class WelcomeController extends AbstractController {
      * GUI. This animation translates to a flashing text effect, characteristic of old-style video games.
      */
     private void setGuiSubtitle() {
-        guiSubtitle.setImage(ImageLoader.SUBTITLE1);
+        guiSubtitle.setImage(ImageLoader.ENTER_DATE_RANGE);
 
-        guiSubtitle.setFitWidth(440);
-        guiSubtitle.setFitHeight(150);
+        guiSubtitle.setFitWidth(960);
+        guiSubtitle.setFitHeight(600);
 
         new Thread(() -> {
             ColorAdjust colorAdjust = new ColorAdjust();
             float delta = -1f / 24;
-            float brightness = 1f;
+            float brightness = 0.5f;
 
             colorAdjust.setBrightness(brightness);
             guiSubtitle.setEffect(colorAdjust);
@@ -290,8 +300,8 @@ public class WelcomeController extends AbstractController {
     private void setGuiCharacter() {
         guiCharacter.setImage(ImageLoader.CHARACTER);
 
-        guiCharacter.setFitWidth(320);
-        guiCharacter.setFitHeight(350);
+        guiCharacter.setFitWidth(960);
+        guiCharacter.setFitHeight(600);
         guiCharacter.setPreserveRatio(false);
     }
 
@@ -301,15 +311,8 @@ public class WelcomeController extends AbstractController {
      * This method shows the welcome screen to the user by creating a new Stage and setting the scene to the welcome screen.
      * The stage is then displayed to the user.
      */
-    public void showWelcomeScreen() {
-        Stage welcomeStage = new Stage();
-        welcomeStage.setTitle("Welcome to ??");
-        welcomeStage.setResizable(false);
-
-        Scene welcomeScene = new Scene(parent);
-
-        welcomeStage.setScene(welcomeScene);
-        welcomeStage.show();
+    public Scene showWelcomeScreen() {
+        return new Scene(parent, 960, 600);
     }
 
     /**

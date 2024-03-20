@@ -1,51 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="600.0" prefWidth="960.0"
-            xmlns="http://javafx.com/javafx/17.0.2-ea">
+
+<AnchorPane prefHeight="600.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <ImageView fx:id="welcomeBackdrop" fitHeight="600.0" fitWidth="960.0" pickOnBounds="true" preserveRatio="true"/>
-        <StackPane fx:id="stackPane" alignment="TOP_CENTER" layoutX="505.0" layoutY="1.0" prefHeight="600.0"
-                   prefWidth="450.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="0.0">
+        <ImageView fx:id="welcomeBackdrop" fitHeight="600.0" fitWidth="960.0" pickOnBounds="true" preserveRatio="true" />
+        <StackPane fx:id="stackPane" alignment="TOP_CENTER" layoutX="505.0" layoutY="1.0" prefHeight="600.0" prefWidth="450.0" AnchorPane.leftAnchor="500.0" AnchorPane.rightAnchor="0.0">
             <padding>
-                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding>
             <children>
                 <VBox>
                     <children>
                         <HBox fx:id="hBox" spacing="20.0">
                             <children>
-                                <Label text="From:" textFill="WHITE"/>
-                                <ComboBox fx:id="from" prefWidth="150.0"/>
-                                <Label text="To:" textFill="WHITE"/>
-                                <ComboBox fx:id="to" prefWidth="150.0"/>
+                                <Label text="From:" textFill="WHITE" />
+                                <ComboBox fx:id="from" prefWidth="150.0" />
+                                <Label text="To:" textFill="WHITE" />
+                                <ComboBox fx:id="to" prefWidth="150.0" />
                             </children>
                         </HBox>
                         <VBox VBox.vgrow="ALWAYS">
                             <children>
-                                <Label fx:id="errorMessage" prefHeight="21.0" prefWidth="444.0"
-                                       style="-fx-font-weight: bold;" text="Error: Invalid date range"
-                                       textFill="#f20000" visible="false" wrapText="true">
+                                <Label fx:id="errorMessage" prefHeight="21.0" prefWidth="444.0" style="-fx-font-weight: bold;" text="Error: Invalid date range" textFill="#f20000" visible="false" wrapText="true">
                                     <VBox.margin>
-                                        <Insets top="10.0"/>
+                                        <Insets top="10.0" />
                                     </VBox.margin>
                                 </Label>
-                                <Region prefHeight="126.0" prefWidth="439.0" visible="false"/>
+                                <Region prefHeight="126.0" prefWidth="439.0" visible="false" />
                             </children>
                         </VBox>
-                        <ImageView fx:id="guiTitle" fitHeight="180.0" fitWidth="440.0" pickOnBounds="true"
-                                   preserveRatio="true"/>
-                        <ImageView fx:id="guiSubtitle" fitHeight="150.0" fitWidth="440.0" pickOnBounds="true"
-                                   preserveRatio="true"/>
-                        <Region prefHeight="107.0" prefWidth="439.0" VBox.vgrow="ALWAYS"/>
+                        <ImageView fx:id="guiTitle" fitHeight="180.0" fitWidth="440.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fx:id="guiSubtitle" fitHeight="150.0" fitWidth="440.0" pickOnBounds="true" preserveRatio="true" />
+                        <Region prefHeight="107.0" prefWidth="439.0" VBox.vgrow="ALWAYS" />
                     </children>
                 </VBox>
             </children>
         </StackPane>
-        <ImageView fx:id="guiCharacter" fitHeight="350.0" fitWidth="320.0" layoutX="72.0" layoutY="124.0"
-                   pickOnBounds="true" preserveRatio="true"/>
+        <ImageView fx:id="guiCharacter" fitHeight="350.0" fitWidth="320.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true" />
     </children>
 </AnchorPane>
