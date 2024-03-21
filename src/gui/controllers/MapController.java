@@ -1,5 +1,6 @@
 package gui.controllers;
 
+import gui.SceneInitialiser;
 import gui.components.ImageLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +13,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 public class MapController extends AbstractController {
 
@@ -30,16 +32,17 @@ public class MapController extends AbstractController {
      * No-argument constructor for the MapController class
      */
     public MapController() {
-        this(null);
+        this(null, null);
     }
 
     /**
      * Constructor for the MapController class
      *
-     * @param queryString The query string to be used
+     * @param startDate The start date of the date range
+     * @param endDate   The end date of the date range
      */
-    private MapController(String queryString) {
-        super(queryString);
+    public MapController(LocalDate startDate, LocalDate endDate) {
+        super("SELECT borough, sum(total_cases) AS total FROM covid_london WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' GROUP BY borough;");
     }
 
     @Override
@@ -57,6 +60,12 @@ public class MapController extends AbstractController {
         setBackText();
     }
 
+    /**
+     * Method to set the back button.
+     * <p>
+     * This method sets the back button by setting the image, size, and mouse events for it. It also adds the
+     * style class "clickable" to the back button. to ensure correct styling.
+     */
     private void setBackText() {
         backText.setImage(ImageLoader.BACK);
         backText.setFitWidth(110);
@@ -82,10 +91,8 @@ public class MapController extends AbstractController {
 
 
                 Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-                WelcomeController controller = new WelcomeController();
-                controller.beginLoading();
 
-                stage.setScene(controller.showWelcomeScreen());
+                stage.setScene(SceneInitialiser.scenes.get("welcome"));
             });
             return;
         }
@@ -97,7 +104,10 @@ public class MapController extends AbstractController {
         });
     }
 
-    public Scene getMapFrame() {
+    /**
+     * @return The scene for the map screen
+     */
+    public Scene getMapScene() {
         return new Scene(parent, 960, 600);
     }
 }

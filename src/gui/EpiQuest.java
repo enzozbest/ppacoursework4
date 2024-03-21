@@ -1,8 +1,6 @@
 package gui;
 
-import gui.controllers.WelcomeController;
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
@@ -17,7 +15,6 @@ import javafx.stage.Stage;
 @SuppressWarnings("all")
 public class EpiQuest extends Application {
 
-    private Stage stage;
 
     public static void main(String[] args) {
         launch(args);
@@ -25,20 +22,9 @@ public class EpiQuest extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        this.stage = stage;
-        WelcomeController welcomeController = new WelcomeController();
-        welcomeController.beginLoading();
+        SceneInitialiser sceneInitialiser = new SceneInitialiser();
 
-        Scene welcomeScene = welcomeController.showWelcomeScreen();
-
-        stage.setScene(welcomeScene);
-
-       /*LocalDate startDate = welcomeController.getFromDate();
-        LocalDate endDate = welcomeController.getToDate();
-
-        StatisticsController statisticsController = new StatisticsController();
-        statisticsController.initialiseDates(startDate, endDate);
-        statisticsController.beginLoading();*/
+        stage.setScene(SceneInitialiser.scenes.get("welcome"));
 
         stage.setResizable(false);
         stage.setTitle("EpiQuest");

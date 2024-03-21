@@ -1,5 +1,6 @@
 package gui.controllers;
 
+import gui.SceneInitialiser;
 import gui.components.ImageLoader;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -156,10 +157,7 @@ public class WelcomeController extends AbstractController {
 
                 Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 
-                MapController mapController = new MapController();
-                mapController.beginLoading();
-
-                stage.setScene(mapController.getMapFrame());
+                stage.setScene(SceneInitialiser.scenes.get("map"));
             });
             return;
         }
@@ -249,8 +247,8 @@ public class WelcomeController extends AbstractController {
     private void setGuiTitle() {
         guiTitle.setImage(ImageLoader.TITLE); //doesnt exist yet!
 
-        guiTitle.setFitWidth(960);
-        guiTitle.setFitHeight(600);
+        guiTitle.setFitWidth(477);
+        guiTitle.setFitHeight(114);
         guiTitle.setPreserveRatio(false);
 
     }
@@ -266,8 +264,8 @@ public class WelcomeController extends AbstractController {
     private void setGuiSubtitle() {
         guiSubtitle.setImage(ImageLoader.ENTER_DATE_RANGE);
 
-        guiSubtitle.setFitWidth(960);
-        guiSubtitle.setFitHeight(600);
+        guiSubtitle.setFitWidth(484);
+        guiSubtitle.setFitHeight(66);
 
         new Thread(() -> {
             ColorAdjust colorAdjust = new ColorAdjust();
@@ -300,8 +298,8 @@ public class WelcomeController extends AbstractController {
     private void setGuiCharacter() {
         guiCharacter.setImage(ImageLoader.CHARACTER);
 
-        guiCharacter.setFitWidth(960);
-        guiCharacter.setFitHeight(600);
+        guiCharacter.setFitWidth(340);
+        guiCharacter.setFitHeight(424);
         guiCharacter.setPreserveRatio(false);
     }
 
@@ -311,7 +309,7 @@ public class WelcomeController extends AbstractController {
      * This method shows the welcome screen to the user by creating a new Stage and setting the scene to the welcome screen.
      * The stage is then displayed to the user.
      */
-    public Scene showWelcomeScreen() {
+    public Scene getWelcomeScene() {
         return new Scene(parent, 960, 600);
     }
 
@@ -319,6 +317,9 @@ public class WelcomeController extends AbstractController {
      * @return The start date selected by the user.
      */
     public LocalDate getFromDate() {
+        if (from.getValue() == null) {
+            return null;
+        }
         return formatDate(from.getValue().toString());
     }
 
@@ -326,6 +327,9 @@ public class WelcomeController extends AbstractController {
      * @return The end date selected by the user.
      */
     public LocalDate getToDate() {
+        if (to.getValue() == null) {
+            return null;
+        }
         return formatDate(to.getValue().toString());
     }
 }

@@ -1,5 +1,6 @@
 package gui.controllers;
 
+import gui.SceneInitialiser;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -30,11 +31,11 @@ public class StatisticsController extends AbstractController {
      * Constructor for the AbstractController class.
      */
     public StatisticsController() {
-        this(null);
+        this(null, null);
     }
 
-    protected StatisticsController(String queryString) {
-        super(queryString);
+    public StatisticsController(LocalDate startDate, LocalDate endDate) {
+        super("SELECT AVG(total_cases) AS average_total_cases FROM covid_london WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "';");
     }
 
     @Override
@@ -53,11 +54,7 @@ public class StatisticsController extends AbstractController {
         Node a = parent;
 
         Stage stage = (Stage) a.getScene().getWindow();
-    }
-
-    public void initialiseDates(LocalDate startDate, LocalDate endDate) {
-        this.startDate = startDate;
-        this.endDate = endDate;
+        stage.setScene(SceneInitialiser.scenes.get("stats"));
     }
 
     private Double calculateAverageTotalCases() {
@@ -85,9 +82,7 @@ public class StatisticsController extends AbstractController {
         statistic.setText(displayValue + " (2d.p.)");
     }
 
-    public void showStatisticsScreen() {
-        Stage stage = new Stage();
-        stage.setScene(new Scene(parent, 960, 600));
-        stage.show();
+    public Scene getStatisticsScene() {
+        return new Scene(parent, 960, 600);
     }
 }
