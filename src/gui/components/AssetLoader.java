@@ -68,4 +68,6 @@ public class AssetLoader {
 
     public static final Font EQ_FONT = Font.loadFont("file:/home/enzozbest/IdeaProjects/ppacoursework4/src/resources/fonts/font.ttf", 30);
 
+    // public static final Image GRAPH_BACKDROP = new Image("graph_backdrop.png");
+
 }

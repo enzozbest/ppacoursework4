@@ -57,7 +57,7 @@ public class SceneInitialiser {
         new Thread(() -> {
             while (welcomeController.getFromDate() == null || welcomeController.getToDate() == null) {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

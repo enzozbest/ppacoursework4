@@ -3,16 +3,25 @@ package gui.controllers;
 import gui.components.AssetLoader;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.shape.Polygon;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.web.WebView;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 @SuppressWarnings("rawtypes")
 public class MapController extends AbstractController {
@@ -23,6 +32,12 @@ public class MapController extends AbstractController {
     private ImageView backText, mapFrame, mapImage, forwardText;
     @FXML
     private WebView webViewMap;
+    @FXML
+    private Group map_group;
+    @FXML
+    private Label stack_borough_name, stack_borough_deaths, stack_total_cases, stack_title;
+    @FXML
+    private VBox label_container;
     private AnchorPane parent;
 
     /**
@@ -61,7 +76,7 @@ public class MapController extends AbstractController {
             System.out.println("Error loading the map frame!" + e.getMessage() + e.getCause() + e.getStackTrace() + e.getLocalizedMessage());
         }
         setMapPanel();
-        scene = new Scene(parent, 960, 600);
+        scene = new Scene(parent, 960, 600, Color.WHITE);
     }
 
     /**
@@ -72,10 +87,11 @@ public class MapController extends AbstractController {
      */
     private void setMapPanel() {
         setBackround();
-        setMap();
+        setStackPane();
         setBackButton();
         setForwardButton();
-        setBoroughColours();
+        drawMap();
+        //setBoroughColours();
         setMouseEvents(true);
     }
 
@@ -93,18 +109,6 @@ public class MapController extends AbstractController {
         mapFrame.setPreserveRatio(true);
     }
 
-    /**
-     * Method to set the map.
-     * <p>
-     * This method sets the map by setting the image of the map to the map image. The image is then resized to fit
-     * the dimensions of the map frame, and the preserve ratio is set to true to ensure the image is not distorted.
-     */
-    private void setMap() {
-        mapImage.setImage(AssetLoader.MAP);
-        mapImage.setFitWidth(450);
-        mapImage.setFitHeight(380);
-        mapImage.setPreserveRatio(true);
-    }
 
     /**
      * Method to set the back button.
@@ -148,6 +152,187 @@ public class MapController extends AbstractController {
     }
 
     /**
+     * Method to set the stack pane for the map.
+     * <p>
+     * This method sets the stack pane for the map by setting the font, width, wrap text, and scale of the labels
+     * in the stack pane. The stack pane is then set to invisible.
+     */
+    private void setStackPane() {
+        stack_title.setFont(AssetLoader.EQ_FONT);
+        stack_title.prefWidthProperty().bind(label_container.widthProperty());
+        stack_title.setWrapText(true);
+        stack_title.setScaleX(0.5);
+        stack_title.setScaleY(0.5);
+
+        stack_borough_name.setFont(AssetLoader.EQ_FONT);
+        stack_borough_name.prefWidthProperty().bind(label_container.widthProperty());
+        stack_borough_name.setWrapText(true);
+        stack_borough_name.setScaleX(0.5);
+        stack_borough_name.setScaleY(0.5);
+
+        stack_total_cases.setFont(AssetLoader.EQ_FONT);
+        stack_total_cases.prefWidthProperty().bind(label_container.widthProperty());
+        stack_total_cases.setWrapText(true);
+        stack_total_cases.setScaleX(0.5);
+        stack_total_cases.setScaleY(0.5);
+
+        stack_borough_deaths.setFont(AssetLoader.EQ_FONT);
+        stack_borough_deaths.prefWidthProperty().bind(label_container.widthProperty());
+        stack_borough_deaths.setWrapText(true);
+        stack_borough_deaths.setScaleX(0.5);
+        stack_borough_deaths.setScaleY(0.5);
+
+        stack_title.setVisible(false);
+        stack_borough_name.setVisible(false);
+        stack_total_cases.setVisible(false);
+        stack_borough_deaths.setVisible(false);
+    }
+
+    /**
+     * Method to draw the map.
+     * <p>
+     * This method draws the map by reading the coordinates of the boroughs from a file and creating SVG paths for each
+     * borough. The SVG paths are then added to the map group.
+     */
+    private void drawMap() {
+
+        File file = new File("/home/enzozbest/IdeaProjects/ppacoursework4/src/gui/map/london_boroughs.coords");
+        try {
+            Scanner reader = new Scanner(file);
+            while (reader.hasNext()) {
+                /*
+                StackPane tile = new StackPane();
+                String boroughCoordinates = reader.nextLine();
+                String[] coordinates = boroughCoordinates.split(":");
+                String boroughName = coordinates[0];
+                String svgPath = "M " + coordinates[1].replace(",", "") + " Z";
+                String hexCode = String.format("#%06X", (int) (Math.random() * 0x1000000));
+
+                tile.setId("tile_" + String.join("", boroughName.split(" ")).toLowerCase());
+                tile.setStyle("-fx-background-color: " + hexCode + ";" +
+                        "-fx-shape: \"" + svgPath + "\";" +
+                        "-fx-border-color: black;" +
+                        "-fx-fill: " + hexCode + ";");
+                map_group.getChildren().add(tile);*/
+
+                String boroughCoordinates = reader.nextLine();
+                String[] coordinates = boroughCoordinates.split(":");
+                String svgPath = "M " + coordinates[1].replace(",", "") + " Z";
+                String boroughName = coordinates[0];
+                SVGPath boroughBoundary = new SVGPath();
+                boroughBoundary.setContent(svgPath);
+                boroughBoundary.setId("tile_" + String.join("", boroughName.split(" ")).toLowerCase());
+                String hexCode = String.format("#%06X", (int) (Math.random() * 0x1000000));
+                boroughBoundary.setStyle("-fx-fill: " + hexCode + ";" + "-fx-border-style: solid;" + "-fx-border-width: thin;");
+                boroughBoundary.getStyleClass().add("clickable");
+                setBoroughClickEvent(boroughBoundary, boroughName);
+                setBoroughHoverEvent(true, boroughBoundary, boroughName);
+                map_group.getChildren().add(boroughBoundary);
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading the coordinates file! " + e.getMessage() + e.getCause() + e.getStackTrace());
+        }
+
+    }
+
+    /**
+     * Method to set the click event for the boroughs on the map.
+     *
+     * @param boroughBoundary The SVG path for the borough
+     * @param boroughName     The name of the borough
+     */
+    private void setBoroughClickEvent(SVGPath boroughBoundary, String boroughName) {
+        boroughBoundary.setOnMouseClicked(event -> {
+            boroughBoundary.setScaleX(1.3);
+            boroughBoundary.setScaleY(1.3);
+            disableHover();
+            boroughBoundary.setStroke(Paint.valueOf("black"));
+            boroughBoundary.setOnMouseExited(event1 -> {
+                boroughBoundary.setStroke(Paint.valueOf("black"));
+            });
+            parent.lookup("#" + boroughBoundary.getId()).toFront();
+            stack_title.setVisible(true);
+            stack_borough_name.setText(boroughName);
+            stack_borough_name.setVisible(true);
+            sendEverythingToBack(boroughBoundary.getId());
+        });
+    }
+
+    /**
+     * Method to send every borough apart from the one whose id is passed as a parameter to the back.
+     *
+     * @param id The id of the borough to send to the front
+     */
+    private void sendEverythingToBack(String id) {
+        ArrayList<String> ids = new ArrayList<>();
+        for (Node path : map_group.getChildren()) {
+            if (path.getId().equals(id)) {
+                continue;
+            }
+            ids.add(path.getId());
+        }
+        for (String boroughID : ids) {
+            SVGPath borough = (SVGPath) parent.lookup("#" + boroughID);
+
+            borough.setScaleX(1);
+            borough.setScaleY(1);
+            borough.setStroke(Paint.valueOf("transparent"));
+            borough.toBack();
+        }
+    }
+
+    /**
+     * Method to set the hover event for the boroughs on the map.
+     *
+     * @param setting         Whether to add or remove the hover event
+     * @param boroughBoundary The SVG path for the borough
+     * @param boroughName     The name of the borough
+     */
+    private void setBoroughHoverEvent(boolean setting, SVGPath boroughBoundary, String boroughName) {
+        if (setting) {
+            boroughBoundary.setOnMouseEntered(event -> {
+                boroughBoundary.setScaleX(1.3);
+                boroughBoundary.setScaleY(1.3);
+                boroughBoundary.setStroke(Paint.valueOf("black"));
+                parent.lookup("#" + boroughBoundary.getId()).toFront();
+                stack_title.setVisible(true);
+                stack_borough_name.setText(boroughName);
+                stack_borough_name.setVisible(true);
+            });
+
+            boroughBoundary.setOnMouseExited(event -> {
+                boroughBoundary.setScaleX(1);
+                boroughBoundary.setScaleY(1);
+                boroughBoundary.setStroke(Paint.valueOf("transparent"));
+                stack_title.setVisible(false);
+                stack_borough_name.setVisible(false);
+                parent.lookup("#" + boroughBoundary.getId()).toBack();
+            });
+
+            return;
+        }
+
+        boroughBoundary.setOnMouseEntered(event -> {
+            boroughBoundary.setStroke(Paint.valueOf("black"));
+        });
+
+        boroughBoundary.setOnMouseExited(event -> {
+            boroughBoundary.setStroke(Paint.valueOf("transparent"));
+        });
+
+    }
+
+    /**
+     * Method to change the hover event for the boroughs on the map after the first click on a borough has happened.
+     */
+    private void disableHover() {
+        for (Node path : map_group.getChildren()) {
+            SVGPath svgPath = (SVGPath) path;
+            setBoroughHoverEvent(false, svgPath, path.getId().substring(5));
+        }
+    }
+
+    /**
      * Method to set the colours of the boroughs on the map.
      * <p>
      * This method sets the colours of the boroughs on the map based on the number of deaths in each borough.
@@ -162,14 +347,10 @@ public class MapController extends AbstractController {
         try {
             while (data.next()) {
                 int deaths = data.getInt("borough_deaths");
+                String boroughName = String.join("", data.getString("borough").split(" ")).toLowerCase();
                 String colour = findColour(deaths);
-                Polygon polygon = new Polygon();
-                polygon.getPoints().add(6.0);
-                polygon.setId("borough-" + data.getString("borough"));
-                polygon.setStyle("-fx-fill: " + colour);
-
-                parent.getChildren().add(polygon);
-                parent.getChildren().getLast().toFront();
+                SVGPath tile = (SVGPath) parent.lookup("#tile_" + boroughName);
+                tile.setStyle("-fx-background-color: " + colour + ";");
             }
         } catch (SQLException e) {
             System.out.println("Error setting borough colours! " + e.getMessage() + e.getCause() + e.getStackTrace());

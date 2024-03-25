@@ -5,7 +5,3 @@
 .mapIcon:hover {
     -fx-cursor: hand;
 }
-
-.root:hover {
-    -fx-cursor: default;
-}

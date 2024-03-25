@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.shape.Rectangle?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="600.0" prefWidth="960.0"
-            xmlns="http://javafx.com/javafx/17.0.2-ea">
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="600.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="530.0" layoutX="32.0" layoutY="35.0"
-                   stroke="WHITE" strokeType="INSIDE" width="680.0"/>
-        <ImageView fx:id="mapImage" fitHeight="530.0" fitWidth="680.0" layoutX="153.0" layoutY="56.0"
-                   pickOnBounds="true" preserveRatio="true"/>
-        <ImageView fx:id="mapFrame" fitHeight="600.0" fitWidth="960.0" pickOnBounds="true" preserveRatio="true"/>
-        <StackPane layoutX="630.0" layoutY="28.0" prefHeight="500.0" prefWidth="300.0"/>
-        <ImageView fx:id="backText" fitHeight="40.0" fitWidth="110.0" layoutX="14.0" layoutY="546.0" pickOnBounds="true"
-                   preserveRatio="true"/>
-        <ImageView fx:id="forwardText" fitHeight="40.0" fitWidth="110.0" layoutX="124.0" layoutY="546.0"
-                   pickOnBounds="true" preserveRatio="true"/>
+        <ImageView fx:id="mapFrame" fitHeight="600.0" fitWidth="960.0" pickOnBounds="true" preserveRatio="true" />
+        <StackPane layoutX="688.0" layoutY="64.0" prefHeight="299.0" prefWidth="259.0">
+            <children>
+                <VBox fx:id="label_container" prefHeight="200.0" prefWidth="100.0">
+                    <children>
+                        <Label fx:id="stack_title" prefHeight="63.0" prefWidth="259.0" style="-fx-alignment: center" text="London Borough of" textAlignment="CENTER" />
+                        <Label fx:id="stack_borough_name" prefHeight="94.0" prefWidth="259.0" style="-fx-alignment: center" text="Label" />
+                        <Label fx:id="stack_total_cases" prefHeight="100.0" prefWidth="259.0" style="-fx-alignment: center" text="Label" />
+                        <Label fx:id="stack_borough_deaths" prefHeight="94.0" prefWidth="259.0" style="-fx-alignment: center" text="Label" />
+                        <ImageView fitHeight="42.0" fitWidth="258.0" pickOnBounds="true" preserveRatio="true" />
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+        <ImageView fx:id="backText" fitHeight="40.0" fitWidth="110.0" layoutX="14.0" layoutY="546.0" pickOnBounds="true" preserveRatio="true" />
+        <ImageView fx:id="forwardText" fitHeight="40.0" fitWidth="110.0" layoutX="124.0" layoutY="546.0" pickOnBounds="true" preserveRatio="true" />
+        <Group fx:id="map_group" layoutX="500.0" layoutY="500.0" scaleX="1.45" scaleY="-1.45" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="160.0" />
     </children>
 </AnchorPane>

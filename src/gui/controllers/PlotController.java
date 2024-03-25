@@ -6,6 +6,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.chart.Chart;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -25,10 +27,12 @@ import java.sql.ResultSet;
 public class PlotController extends AbstractController {
 
 
-    private BorderPane parent;
+    private AnchorPane parent;
 
     @FXML
     private Label title;
+    @FXML
+    private ImageView background, back;
 
     private Stage stage;
 
@@ -60,16 +64,10 @@ public class PlotController extends AbstractController {
         }
     }
 
-    /**
-     * This method is called when the close button is clicked. It closes the stage that the plot is displayed in.
-     */
-    @FXML
-    private void closeButton() {
-        if (stage == null) {
-            return;
-        }
-        stage.close();
+    private void setBackground() {
+        //background.setImage(AssetLoader.GRAPH_BACKDROP);
     }
+
 
     /**
      * This method is called to display the plot of the data that is passed to it. It creates a new stage and
@@ -84,7 +82,8 @@ public class PlotController extends AbstractController {
 
         plotter.setData(data);
         Chart centerNode = plotter.plot();
-        parent.setCenter(centerNode);
+        BorderPane bpane = (BorderPane) parent.getChildren().get(0);
+        bpane.setCenter(centerNode);
 
 
         stage.setTitle(centerNode.getTitle());
