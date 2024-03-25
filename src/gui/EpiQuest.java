@@ -27,6 +27,20 @@ public class EpiQuest extends Application {
         stage.setScene(SceneInitialiser.scenes.get("welcome"));
 
         stage.setResizable(false);
+
+
+
+     /*   WebView webView = new WebView();
+        webView.setVisible(true);
+
+        String URL = "/home/enzozbest/IdeaProjects/ppacoursework4/src/gui/map/index.html";
+
+        getHostServices().showDocument(URL);
+
+        Scene scene = new Scene(webView, 800, 600);
+
+        stage.setScene(scene);
+*/
         stage.setTitle("EpiQuest");
         stage.show();
     }

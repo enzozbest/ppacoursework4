@@ -1,12 +1,13 @@
 package gui.controllers;
 
 import gui.SceneInitialiser;
-import gui.components.ImageLoader;
+import gui.components.AssetLoader;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
@@ -41,6 +42,8 @@ public class WelcomeController extends AbstractController {
     private StackPane stackPane;
     @FXML
     private ComboBox from, to;
+
+    private LocalDate fromDate, toDate;
 
     /**
      * Constructor for the WelcomeController.
@@ -77,17 +80,18 @@ public class WelcomeController extends AbstractController {
 
         isValidDateRange.set(false);
 
-        addListeners();
+        setWelcomePanel();
 
-        setAvailableDates();
+        scene = new Scene(parent, 960, 600);
+    }
 
+    private void setWelcomePanel() {
         setWelcomeBackdrop();
-
         setGuiTitle();
-
         setGuiSubtitle();
-
         setGuiCharacter();
+        setAvailableDates();
+        addListeners();
     }
 
     /**
@@ -105,9 +109,9 @@ public class WelcomeController extends AbstractController {
 
         isValidDateRange.addListener((observableValue, oldValue, newValue) -> {
             if (newValue) {
-                guiSubtitle.setImage(ImageLoader.PRESS_TO_START);
+                guiSubtitle.setImage(AssetLoader.PRESS_TO_START);
             } else {
-                guiSubtitle.setImage(ImageLoader.ENTER_DATE_RANGE);
+                guiSubtitle.setImage(AssetLoader.INVALID_DATE_RANGE);
             }
         });
     }
@@ -126,16 +130,21 @@ public class WelcomeController extends AbstractController {
         if (from.getValue() == null || to.getValue() == null) {
             return;
         }
-        LocalDate fromDate = formatDate(from.getValue().toString());
-        LocalDate toDate = formatDate(to.getValue().toString());
+        LocalDate start = formatDate(from.getValue().toString());
+        LocalDate end = formatDate(to.getValue().toString());
 
-        if (!(fromDate.isBefore(toDate) || fromDate.equals(toDate))) {
+        if (!(start.isBefore(end) || start.equals(end))) {
             isValidDateRange.set(false);
+            fromDate = null;
+            toDate = null;
             setStyleClass("clickable", false);
             setMouseEvents(false);
             return;
         }
+
         isValidDateRange.set(true);
+        fromDate = start;
+        toDate = end;
         setStyleClass("clickable", true);
         setMouseEvents(true);
     }
@@ -150,21 +159,18 @@ public class WelcomeController extends AbstractController {
      */
     private void setMouseEvents(boolean setting) {
         if (setting) {
-            guiSubtitle.setOnMouseEntered(mouseEvent -> guiSubtitle.setImage(ImageLoader.PRESS_TO_START));
-            guiSubtitle.setOnMouseExited(mouseEvent -> guiSubtitle.setImage(ImageLoader.PRESS_TO_START));
             guiSubtitle.setOnMouseClicked(mouseEvent -> {
-
-
                 Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 
-                stage.setScene(SceneInitialiser.scenes.get("map"));
+                Scene mapScene = SceneInitialiser.scenes.get("map");
+                stage.setScene(mapScene);
+                mapScene.setCursor(Cursor.DEFAULT);
+                mapScene.getRoot().setCursor(Cursor.DEFAULT);
+
+
             });
             return;
         }
-        guiSubtitle.setOnMouseEntered(mouseEvent -> {
-        });
-        guiSubtitle.setOnMouseExited(mouseEvent -> {
-        });
         guiSubtitle.setOnMouseClicked(mouseEvent -> {
         });
     }
@@ -230,7 +236,7 @@ public class WelcomeController extends AbstractController {
      */
     private void setWelcomeBackdrop() {
 
-        welcomeBackdrop.setImage(ImageLoader.BACKDROP);
+        welcomeBackdrop.setImage(AssetLoader.WELCOME_BACKDROP);
 
         welcomeBackdrop.setFitWidth(960);
         welcomeBackdrop.setFitHeight(600);
@@ -245,7 +251,7 @@ public class WelcomeController extends AbstractController {
      * The title is then added to the screen as an ImageView.
      */
     private void setGuiTitle() {
-        guiTitle.setImage(ImageLoader.TITLE); //doesnt exist yet!
+        guiTitle.setImage(AssetLoader.WELCOME_TITLE); //doesnt exist yet!
 
         guiTitle.setFitWidth(477);
         guiTitle.setFitHeight(114);
@@ -262,7 +268,7 @@ public class WelcomeController extends AbstractController {
      * GUI. This animation translates to a flashing text effect, characteristic of old-style video games.
      */
     private void setGuiSubtitle() {
-        guiSubtitle.setImage(ImageLoader.ENTER_DATE_RANGE);
+        guiSubtitle.setImage(AssetLoader.ENTER_DATE_RANGE);
 
         guiSubtitle.setFitWidth(484);
         guiSubtitle.setFitHeight(66);
@@ -296,7 +302,7 @@ public class WelcomeController extends AbstractController {
      * The character is then added to the screen as an ImageView.
      */
     private void setGuiCharacter() {
-        guiCharacter.setImage(ImageLoader.CHARACTER);
+        guiCharacter.setImage(AssetLoader.WELCOME_CHARACTER);
 
         guiCharacter.setFitWidth(340);
         guiCharacter.setFitHeight(424);
@@ -304,32 +310,22 @@ public class WelcomeController extends AbstractController {
     }
 
     /**
-     * Method to show the welcome screen.
-     * <p>
-     * This method shows the welcome screen to the user by creating a new Stage and setting the scene to the welcome screen.
-     * The stage is then displayed to the user.
-     */
-    public Scene getWelcomeScene() {
-        return new Scene(parent, 960, 600);
-    }
-
-    /**
      * @return The start date selected by the user.
      */
     public LocalDate getFromDate() {
-        if (from.getValue() == null) {
+        if (toDate == null) {
             return null;
         }
-        return formatDate(from.getValue().toString());
+        return formatDate(fromDate.toString());
     }
 
     /**
      * @return The end date selected by the user.
      */
     public LocalDate getToDate() {
-        if (to.getValue() == null) {
+        if (toDate == null) {
             return null;
         }
-        return formatDate(to.getValue().toString());
+        return formatDate(toDate.toString());
     }
 }

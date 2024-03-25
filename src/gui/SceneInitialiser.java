@@ -49,7 +49,7 @@ public class SceneInitialiser {
     private void createScenes() {
         WelcomeController welcomeController = new WelcomeController();
         welcomeController.beginLoading();
-        Scene welcomeScene = welcomeController.getWelcomeScene();
+        Scene welcomeScene = welcomeController.getScene();
         scenes.put("welcome", welcomeScene);
 
         //Use a separate thread to wait for the user to select the dates before setting the fields and creating the next
@@ -85,7 +85,7 @@ public class SceneInitialiser {
     private void createMapScene() {
         MapController mapController = new MapController(startDate, endDate);
         mapController.beginLoading();
-        Scene mapScene = mapController.getMapScene();
+        Scene mapScene = mapController.getScene();
 
         scenes.put("map", mapScene);
     }
@@ -101,7 +101,7 @@ public class SceneInitialiser {
     private void createStatisticsScene() {
         StatisticsController statisticsController = new StatisticsController(startDate, endDate);
         statisticsController.beginLoading();
-        Scene statisticsScene = statisticsController.getStatisticsScene();
+        Scene statisticsScene = statisticsController.getScene();
 
         scenes.put("stats", statisticsScene);
     }

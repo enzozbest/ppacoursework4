@@ -24,7 +24,7 @@ import java.sql.ResultSet;
  */
 public class PlotController extends AbstractController {
 
-    @FXML
+
     private BorderPane parent;
 
     @FXML
@@ -49,7 +49,8 @@ public class PlotController extends AbstractController {
      */
     @Override
     public void beginLoading() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/plot-frame.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("../fxml/plot-frame.fxml"));
         loader.setController(this);
 
         try {
@@ -78,6 +79,7 @@ public class PlotController extends AbstractController {
      */
     @FXML
     public void showGraph(Plotter plotter) {
+        beginLoading();
         stage = new Stage();
 
         plotter.setData(data);
