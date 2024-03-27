@@ -27,7 +27,8 @@ public class SceneInitialiser {
      * Scene object.
      */
     public static Map<String, Scene> scenes = new HashMap<>();
-
+    private static SceneInitialiser instance;
+    private final WelcomeController welcomeController;
     private LocalDate startDate, endDate;
 
     /**
@@ -36,7 +37,18 @@ public class SceneInitialiser {
      * Creates the scenes for the application.
      */
     public SceneInitialiser() {
+        welcomeController = new WelcomeController();
         createScenes();
+    }
+
+    /**
+     * @return the instance of the SceneInitialiser class.
+     */
+    public static SceneInitialiser getInstance() {
+        if (instance == null) {
+            instance = new SceneInitialiser();
+        }
+        return instance;
     }
 
     /**
@@ -47,13 +59,20 @@ public class SceneInitialiser {
      * The scenes are then stored in a map for easy access throughout the program.
      */
     private void createScenes() {
-        WelcomeController welcomeController = new WelcomeController();
         welcomeController.beginLoading();
         Scene welcomeScene = welcomeController.getScene();
         scenes.put("welcome", welcomeScene);
 
         //Use a separate thread to wait for the user to select the dates before setting the fields and creating the next
         // scenes.
+        waitForDates();
+    }
+
+    /**
+     * Method to wait for the user to select the start and end dates.
+     *
+     */
+    public void waitForDates() {
         new Thread(() -> {
             while (welcomeController.getFromDate() == null || welcomeController.getToDate() == null) {
                 try {
@@ -62,6 +81,7 @@ public class SceneInitialiser {
                     e.printStackTrace();
                 }
             }
+
             startDate = welcomeController.getFromDate();
             endDate = welcomeController.getToDate();
 
@@ -70,8 +90,19 @@ public class SceneInitialiser {
                 createMapScene();
                 createStatisticsScene();
             });
-
         }).start();
+    }
+
+    /**
+     * Method to update the scenes when the user changes the selected date range.
+     * <p>
+     * Remove the map and statistics scenes from the scenes map and wait until dates are set to create the other
+     * application scenes.
+     */
+    public void updateScenes() {
+        scenes.remove("map");
+        scenes.remove("stats");
+        waitForDates();
     }
 
     /**
@@ -105,5 +136,4 @@ public class SceneInitialiser {
 
         scenes.put("stats", statisticsScene);
     }
-
 }

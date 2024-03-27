@@ -13,19 +13,31 @@ import javafx.scene.text.Font;
  * application and also reduces overhead due to construction and garbage collection of image objects.
  *
  * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
- * @version 2024.03.20
+ * @version 2024.03.27
  */
 public class AssetLoader {
 
     /**
      * Image object for background image.
      */
-    public static final Image WELCOME_BACKDROP = new Image("backdrop.png");
+    public static final Image WELCOME_BACKGROUND = new Image("welcome_background.png");
+    /**
+     * Image object for the stats background.
+     */
+    public static final Image STATS_BACKGROUND = new Image("stats_background.png");
+    /**
+     * Image object for the graph backdrop.
+     */
+    public static final Image GRAPH_BACKGROUND = new Image("graph_background.png");
+    /**
+     * Image object for the map frame.
+     */
+    public static final Image MAP_FRAME = new Image("map_frame.png");
 
     /**
      * Image object for the title on the main screen.
      */
-    public static final Image WELCOME_TITLE = new Image("title.png");
+    public static final Image WELCOME_TITLE = new Image("welcome_title.png");
 
     /**
      * Image object for ENTER_DATE_RANGE subtitle on the main screen.
@@ -41,33 +53,30 @@ public class AssetLoader {
      * Image object for selector GIF shown on hover on the main screen.
      */
     public static final Image INVALID_DATE_RANGE = new Image("invalid_date_range.png");
+    /**
+     * Image for the "select location" text.
+     */
+    public static final Image SELECT_LOCATION = new Image("select_location.png");
 
     /**
-     * Image object for character on the main screen.
+     * Image object for the forward arrow.
      */
-    public static final Image WELCOME_CHARACTER = new Image("character.gif");
+    public static final Image ARROW = new Image("forward_arrow.png");
 
     /**
-     * Image object for the back text.
+     * Image object for character on the welcome screen.
      */
-    public static final Image BACK = new Image("back.png");
-
-    public static final Image FORWARD = new Image("forward.png");
+    public static final Image CHARACTER = new Image("character.gif");
 
     /**
-     * Image object for the map frame.
+     * Image object for the small character
      */
-    public static final Image MAP_FRAME = new Image("map_frame.png");
+    public static final Image SMALL_CHARACTER = new Image("small_character.gif");
 
     /**
-     * Image object for the map.
+     * Font object for the Retro Gaming font
      */
-    public static final Image MAP = new Image("map.png");
+    public static final Font RETRO_GAMING = Font.loadFont("file:/home/enzozbest/IdeaProjects/ppacoursework4/src/resources/fonts/font.ttf", 30);
 
-    public static final Image STATS_BACKGROUND = new Image("stats_background.png");
-
-    public static final Font EQ_FONT = Font.loadFont("file:/home/enzozbest/IdeaProjects/ppacoursework4/src/resources/fonts/font.ttf", 30);
-
-    // public static final Image GRAPH_BACKDROP = new Image("graph_backdrop.png");
 
 }

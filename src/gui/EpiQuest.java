@@ -31,6 +31,7 @@ public class EpiQuest extends Application {
 
         stage.setTitle("EpiQuest");
         stage.show();
+
     }
 
 }

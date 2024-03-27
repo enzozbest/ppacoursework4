@@ -1,15 +1,16 @@
 package utils.sql.queries.processors;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import utils.CovidData;
-import utils.sql.queries.concurrent.QueryExecutor;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class RecordGenerator extends AbstractProcessor {
 
-    public RecordGenerator(QueryExecutor executor) {
-        super(executor);
+    public RecordGenerator(ResultSet resultSet) {
+        super(resultSet);
     }
 
     /**
@@ -18,8 +19,8 @@ public class RecordGenerator extends AbstractProcessor {
      *
      * @throws SQLException if the result set is empty or if there is an error accessing the data in the result set.
      */
-    public ArrayList<CovidData> processQuery() throws SQLException {
-        ArrayList<CovidData> data = new ArrayList<>();
+    public ObservableList<CovidData> processQuery() throws SQLException {
+        ObservableList<CovidData> data = FXCollections.observableArrayList();
         while (resultSet.next()) {
             data.add(new CovidData(resultSet.getString("date"), resultSet.getString("borough"), resultSet.getInt("retail_and_recreation"),
                     resultSet.getInt("grocery_and_pharmacy"), resultSet.getInt("parks"), resultSet.getInt("transit_stations"),

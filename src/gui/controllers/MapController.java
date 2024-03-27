@@ -6,39 +6,66 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
-import javafx.scene.web.WebView;
+import javafx.scene.text.Text;
+import utils.sql.queries.Query;
+import utils.sql.queries.concurrent.QueryExecutor;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
+/**
+ * Class to control the map panel.
+ * <p>
+ * This class controls the map screen by setting the map panel and displaying the map of London with its boroughs
+ * delineated to the user. The boroughs are coloured based on the percentage of deaths in each borough for the selected
+ * date range.
+ * <p>
+ * The user can  hover over a borough to view the name of the borough, the total number of cases, and the number of
+ * deaths. The borough is highlighted in black when hovered over, as well as being enlarged.
+ * <p>
+ * If a borough is clicked, the hover effects for the other boroughs are disabled. The basic data for the clicked
+ * borough remains displayed, but an additional "View Borough" button appears. The clicked borough will remain
+ * highlighted in black and enlarged. If a different borough is clicked, the old borough will no longer be highlighted
+ * and enlarged, and those effects will rather apply to the newly clicked borough.
+ * <p>
+ * Clicking on the "View Borough" button displays all the data for the selected borough for the selected date range in a
+ * new window, in a table format.
+ * <p>
+ * The user can navigate between this panel and the other panels in the application by using the navigation buttons
+ * in the bottom left corner of the screen.
+ *
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @version 2024.03.27
+ */
 @SuppressWarnings("rawtypes")
 public class MapController extends AbstractController {
 
     @FXML
     private ListView list;
     @FXML
-    private ImageView backText, mapFrame, mapImage, forwardText;
-    @FXML
-    private WebView webViewMap;
+    private ImageView map_frame, mapImage, select_location;
     @FXML
     private Group map_group;
     @FXML
-    private Label stack_borough_name, stack_borough_deaths, stack_total_cases, stack_title;
+    private Text stack_borough_name, stack_button, stack_total_cases, stack_borough_deaths, back_text, forward_text;
     @FXML
     private VBox label_container;
     private AnchorPane parent;
+    private LocalDate startDate, endDate;
+    private HashMap<String, Integer[]> localBoroughRecords;
 
     /**
      * No-argument constructor for the MapController class
@@ -53,9 +80,12 @@ public class MapController extends AbstractController {
      * @param endDate   The end date of the date range
      */
     public MapController(LocalDate startDate, LocalDate endDate) {
-        super("SELECT borough, sum(new_deaths) AS borough_deaths " +
+        super("SELECT borough, sum(new_deaths) AS borough_deaths, sum(new_cases) AS borough_cases " +
                 "FROM covid_london " +
                 "WHERE date BETWEEN '" + startDate + "'  AND '" + endDate + "' GROUP BY borough");
+
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     /**
@@ -71,7 +101,8 @@ public class MapController extends AbstractController {
 
         try {
             parent = loader.load();
-            parent.getStylesheets().add(getClass().getResource("../styles/default.css").toExternalForm());
+            parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
+            parent.getStylesheets().add(getClass().getResource("../../resources/styles/map-view.css").toExternalForm());
         } catch (IOException e) {
             System.out.println("Error loading the map frame!" + e.getMessage() + e.getCause() + e.getStackTrace() + e.getLocalizedMessage());
         }
@@ -86,13 +117,14 @@ public class MapController extends AbstractController {
      * The map panel is then displayed to the user.
      */
     private void setMapPanel() {
+        processQuery();
         setBackround();
+        setSelectLocationText();
         setStackPane();
         setBackButton();
         setForwardButton();
-        drawMap();
-        //setBoroughColours();
         setMouseEvents(true);
+        drawMap();
     }
 
     /**
@@ -103,10 +135,24 @@ public class MapController extends AbstractController {
      * ensure the image is not distorted.
      */
     private void setBackround() {
-        mapFrame.setImage(AssetLoader.MAP_FRAME);
-        mapFrame.setFitWidth(960);
-        mapFrame.setFitHeight(600);
-        mapFrame.setPreserveRatio(true);
+        map_frame.setImage(AssetLoader.MAP_FRAME);
+        map_frame.setFitWidth(960);
+        map_frame.setFitHeight(600);
+        map_frame.setPreserveRatio(true);
+    }
+
+    /**
+     * Method to set the select location text.
+     * <p>
+     * This method sets the select location text by setting the image of the select location image view to the select
+     * location image. The image is then resized to fit the dimensions of the image view, and the preserve ratio is set
+     * to true to ensure the image is not distorted.
+     */
+    private void setSelectLocationText() {
+        select_location.setImage(AssetLoader.SELECT_LOCATION);
+        select_location.setFitWidth(180);
+        select_location.setFitHeight(100);
+        select_location.setPreserveRatio(true);
     }
 
 
@@ -117,11 +163,8 @@ public class MapController extends AbstractController {
      * style class "clickable" to the back button. to ensure correct styling.
      */
     private void setBackButton() {
-        backText.setImage(AssetLoader.BACK);
-        backText.setFitWidth(110);
-        backText.setFitHeight(40);
-        backText.setPreserveRatio(true);
-        backText.getStyleClass().add("clickable");
+        back_text.getStyleClass().add("clickable");
+        hoverFlash(back_text);
     }
 
     /**
@@ -131,11 +174,8 @@ public class MapController extends AbstractController {
      * style class "clickable" to the forward button. to ensure correct styling.
      */
     private void setForwardButton() {
-        forwardText.setImage(AssetLoader.FORWARD);
-        forwardText.setFitWidth(110);
-        forwardText.setFitHeight(40);
-        forwardText.setPreserveRatio(true);
-        forwardText.getStyleClass().add("clickable");
+        forward_text.getStyleClass().add("clickable");
+        hoverFlash(forward_text);
     }
 
     /**
@@ -145,10 +185,10 @@ public class MapController extends AbstractController {
      */
     private void setMouseEvents(boolean setting) {
         if (setting) {
-            super.setNavigationEvents(true, backText, forwardText, "welcome", "stats");
+            super.setNavigationEvents(true, back_text, forward_text, "welcome", "stats");
             return;
         }
-        super.setNavigationEvents(false, backText, forwardText, "welcome", "stats");
+        super.setNavigationEvents(false, back_text, forward_text, "welcome", "stats");
     }
 
     /**
@@ -158,34 +198,17 @@ public class MapController extends AbstractController {
      * in the stack pane. The stack pane is then set to invisible.
      */
     private void setStackPane() {
-        stack_title.setFont(AssetLoader.EQ_FONT);
-        stack_title.prefWidthProperty().bind(label_container.widthProperty());
-        stack_title.setWrapText(true);
-        stack_title.setScaleX(0.5);
-        stack_title.setScaleY(0.5);
-
-        stack_borough_name.setFont(AssetLoader.EQ_FONT);
-        stack_borough_name.prefWidthProperty().bind(label_container.widthProperty());
-        stack_borough_name.setWrapText(true);
-        stack_borough_name.setScaleX(0.5);
-        stack_borough_name.setScaleY(0.5);
-
-        stack_total_cases.setFont(AssetLoader.EQ_FONT);
-        stack_total_cases.prefWidthProperty().bind(label_container.widthProperty());
-        stack_total_cases.setWrapText(true);
-        stack_total_cases.setScaleX(0.5);
-        stack_total_cases.setScaleY(0.5);
-
-        stack_borough_deaths.setFont(AssetLoader.EQ_FONT);
-        stack_borough_deaths.prefWidthProperty().bind(label_container.widthProperty());
-        stack_borough_deaths.setWrapText(true);
-        stack_borough_deaths.setScaleX(0.5);
-        stack_borough_deaths.setScaleY(0.5);
-
-        stack_title.setVisible(false);
+        setViewBoroughButton();
         stack_borough_name.setVisible(false);
         stack_total_cases.setVisible(false);
         stack_borough_deaths.setVisible(false);
+    }
+
+    private void setViewBoroughButton() {
+        stack_button.setText("View Borough");
+        stack_button.setVisible(false);
+        stack_button.getStyleClass().add("clickable");
+        indefiniteFlash(stack_button);
     }
 
     /**
@@ -195,44 +218,32 @@ public class MapController extends AbstractController {
      * borough. The SVG paths are then added to the map group.
      */
     private void drawMap() {
-
-        File file = new File("/home/enzozbest/IdeaProjects/ppacoursework4/src/gui/map/london_boroughs.coords");
+        File file = new File("/home/enzozbest/IdeaProjects/ppacoursework4/src/resources/map/london_boroughs_rough.coords");
         try {
             Scanner reader = new Scanner(file);
             while (reader.hasNext()) {
-                /*
-                StackPane tile = new StackPane();
                 String boroughCoordinates = reader.nextLine();
                 String[] coordinates = boroughCoordinates.split(":");
+                String svgPath = "M" + coordinates[1].replace(",", "") + " Z";
                 String boroughName = coordinates[0];
-                String svgPath = "M " + coordinates[1].replace(",", "") + " Z";
-                String hexCode = String.format("#%06X", (int) (Math.random() * 0x1000000));
 
-                tile.setId("tile_" + String.join("", boroughName.split(" ")).toLowerCase());
-                tile.setStyle("-fx-background-color: " + hexCode + ";" +
-                        "-fx-shape: \"" + svgPath + "\";" +
-                        "-fx-border-color: black;" +
-                        "-fx-fill: " + hexCode + ";");
-                map_group.getChildren().add(tile);*/
-
-                String boroughCoordinates = reader.nextLine();
-                String[] coordinates = boroughCoordinates.split(":");
-                String svgPath = "M " + coordinates[1].replace(",", "") + " Z";
-                String boroughName = coordinates[0];
                 SVGPath boroughBoundary = new SVGPath();
                 boroughBoundary.setContent(svgPath);
                 boroughBoundary.setId("tile_" + String.join("", boroughName.split(" ")).toLowerCase());
-                String hexCode = String.format("#%06X", (int) (Math.random() * 0x1000000));
-                boroughBoundary.setStyle("-fx-fill: " + hexCode + ";" + "-fx-border-style: solid;" + "-fx-border-width: thin;");
+
+                boroughBoundary.getStyleClass().clear();
                 boroughBoundary.getStyleClass().add("clickable");
+                boroughBoundary.getStyleClass().add("hoverable");
+
                 setBoroughClickEvent(boroughBoundary, boroughName);
                 setBoroughHoverEvent(true, boroughBoundary, boroughName);
+
                 map_group.getChildren().add(boroughBoundary);
             }
+            setBoroughColours();
         } catch (IOException e) {
             System.out.println("Error reading the coordinates file! " + e.getMessage() + e.getCause() + e.getStackTrace());
         }
-
     }
 
     /**
@@ -243,19 +254,40 @@ public class MapController extends AbstractController {
      */
     private void setBoroughClickEvent(SVGPath boroughBoundary, String boroughName) {
         boroughBoundary.setOnMouseClicked(event -> {
-            boroughBoundary.setScaleX(1.3);
-            boroughBoundary.setScaleY(1.3);
+
             disableHover();
-            boroughBoundary.setStroke(Paint.valueOf("black"));
-            boroughBoundary.setOnMouseExited(event1 -> {
-                boroughBoundary.setStroke(Paint.valueOf("black"));
-            });
-            parent.lookup("#" + boroughBoundary.getId()).toFront();
-            stack_title.setVisible(true);
+
+            boroughBoundary.getStyleClass().add("clicked");
+            boroughBoundary.getStyleClass().remove("clickable");
+            boroughBoundary.getStyleClass().remove("hoverable");
+
+            stack_button.setOnMouseClicked(mouseEvent -> createBoroughView(boroughName, startDate, endDate));
+            stack_button.setVisible(true);
+
             stack_borough_name.setText(boroughName);
             stack_borough_name.setVisible(true);
+
             sendEverythingToBack(boroughBoundary.getId());
         });
+    }
+
+    /**
+     * Method to create the borough view.
+     * <p>
+     * This method creates the borough view by creating a new instance of the BoroughController class and calling the
+     * beginLoading method.
+     * <p>
+     * The borough view is then displayed to the user.
+     * <p>
+     * The borough view displays the data for the selected borough for the selected date range.
+     *
+     * @param boroughName The name of the borough
+     * @param startDate   The start date of the date range
+     * @param endDate     The end date of the date range
+     */
+    private void createBoroughView(String boroughName, LocalDate startDate, LocalDate endDate) {
+        BoroughController controller = new BoroughController(boroughName, startDate, endDate);
+        controller.beginLoading();
     }
 
     /**
@@ -273,11 +305,12 @@ public class MapController extends AbstractController {
         }
         for (String boroughID : ids) {
             SVGPath borough = (SVGPath) parent.lookup("#" + boroughID);
-
             borough.setScaleX(1);
             borough.setScaleY(1);
-            borough.setStroke(Paint.valueOf("transparent"));
-            borough.toBack();
+            borough.getStyleClass().remove("clicked");
+            borough.getStyleClass().remove("hoverable-scaling");
+            borough.getStyleClass().add("clickable");
+            borough.getStyleClass().add("hoverable");
         }
     }
 
@@ -291,35 +324,41 @@ public class MapController extends AbstractController {
     private void setBoroughHoverEvent(boolean setting, SVGPath boroughBoundary, String boroughName) {
         if (setting) {
             boroughBoundary.setOnMouseEntered(event -> {
-                boroughBoundary.setScaleX(1.3);
-                boroughBoundary.setScaleY(1.3);
-                boroughBoundary.setStroke(Paint.valueOf("black"));
+
+                boroughBoundary.getStyleClass().add("hoverable-scaling");
+                // boroughBoundary.setStyle("-fx-stroke-width: 1px; -fx-stroke: black; -fx-fill: transparent");
                 parent.lookup("#" + boroughBoundary.getId()).toFront();
-                stack_title.setVisible(true);
+
                 stack_borough_name.setText(boroughName);
                 stack_borough_name.setVisible(true);
+
+                stack_total_cases.setText("Total Cases: " + localBoroughRecords.get(boroughName)[0]);
+                stack_total_cases.setVisible(true);
+
+                stack_borough_deaths.setText("Deaths: " + localBoroughRecords.get(boroughName)[1]);
+                stack_borough_deaths.setVisible(true);
             });
 
             boroughBoundary.setOnMouseExited(event -> {
-                boroughBoundary.setScaleX(1);
-                boroughBoundary.setScaleY(1);
-                boroughBoundary.setStroke(Paint.valueOf("transparent"));
-                stack_title.setVisible(false);
+
+                //  boroughBoundary.setStyle("-fx-stroke-width: 1px; -fx-stroke: silver");
                 stack_borough_name.setVisible(false);
+                stack_total_cases.setVisible(false);
+                stack_borough_deaths.setVisible(false);
+
                 parent.lookup("#" + boroughBoundary.getId()).toBack();
             });
 
             return;
         }
 
+        boroughBoundary.getStyleClass().remove("hoverable-scaling");
+
         boroughBoundary.setOnMouseEntered(event -> {
-            boroughBoundary.setStroke(Paint.valueOf("black"));
         });
 
         boroughBoundary.setOnMouseExited(event -> {
-            boroughBoundary.setStroke(Paint.valueOf("transparent"));
         });
-
     }
 
     /**
@@ -336,23 +375,35 @@ public class MapController extends AbstractController {
      * Method to set the colours of the boroughs on the map.
      * <p>
      * This method sets the colours of the boroughs on the map based on the number of deaths in each borough.
-     * The colours are set based on the number of deaths in each borough, with the following colour scheme:
-     * 0 deaths: green
-     * 1 death: yellow
-     * 2 deaths: orange
-     * 3 deaths: red
-     * 4+ deaths: dark red
+     * The colours are set based on the number of deaths in each borough, with the following scheme:
+     * 0-1% deaths: green
+     * 1-2% deaths: yellow
+     * 2-3% deaths: orange
+     * 3-4% deaths: red
+     * 4%+ deaths: dark red
      */
     private void setBoroughColours() {
         try {
-            while (data.next()) {
-                int deaths = data.getInt("borough_deaths");
-                String boroughName = String.join("", data.getString("borough").split(" ")).toLowerCase();
-                String colour = findColour(deaths);
-                SVGPath tile = (SVGPath) parent.lookup("#tile_" + boroughName);
-                tile.setStyle("-fx-background-color: " + colour + ";");
+            Query query = new Query("SELECT sum(new_deaths) as period_deaths FROM covid_london WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "'");
+            QueryExecutor executor1 = new QueryExecutor(query);
+
+            ResultSet data2 = executor1.runQuery().get();
+            int periodDeaths = data2.next() ? data2.getInt("period_deaths") : 0;
+
+            for (String boroughName : localBoroughRecords.keySet()) {
+                double death_percentage;
+                if (periodDeaths == 0) {
+                    death_percentage = 0;
+                } else {
+                    death_percentage = (double) localBoroughRecords.get(boroughName)[1] / periodDeaths;
+                }
+
+                String colour = findColour(death_percentage);
+                SVGPath tile = (SVGPath) parent.lookup("#tile_" + String.join("", boroughName.split(" ")).toLowerCase());
+                tile.setStyle("-fx-background-color: " + colour + "; -fx-fill: " + colour + ";");
+
             }
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException | ExecutionException e) {
             System.out.println("Error setting borough colours! " + e.getMessage() + e.getCause() + e.getStackTrace());
         }
     }
@@ -360,26 +411,52 @@ public class MapController extends AbstractController {
     /**
      * Method to find the colour for the borough based on the number of deaths.
      * <p>
-     * This method finds the colour for the borough based on the number of deaths in the borough. The colour is
+     * This method finds the colour for the borough based on the percentage of deaths in the borough. The colour is
      * determined based on the following scheme:
-     * 0 deaths: green
-     * 1 death: yellow
-     * 2 deaths: orange
-     * 3 deaths: red
-     * 4+ deaths: dark red
-     * If the number of deaths is not in the range 0-3, the colour is set to dark red.
+     * 0-1% deaths: green
+     * 1-2% deaths: yellow
+     * 2-3% deaths: orange
+     * 3-4% deaths: red
+     * 4%+ deaths: dark red
      *
-     * @param n The number of deaths in the borough
+     * @param death_percentage The number of deaths in the borough
      * @return The hex code for the colour of the borough
      */
-    private String findColour(int n) {
-        return switch (n) {
-            case 0 -> "#007500"; //Hex code for green;
-            case 1 -> "#FFCB2E"; //Hex code for yellow;
-            case 2 -> "#FA6800"; //Hex code for orange;
-            case 3 -> "#E32227"; //Hex code for red;
-            default -> "#6D0E10"; //Hex code for dark red;
-        };
+    private String findColour(double death_percentage) {
+        if (0 <= death_percentage && death_percentage < 0.01) {
+            return "#007500";
+        }
+        if (0.01 < death_percentage && death_percentage < 0.02) {
+            return "#FFCB2E";
+        }
+        if (0.02 < death_percentage && death_percentage < 0.03) {
+            return "#FA6800";
+        }
+        if (0.03 < death_percentage && death_percentage < 0.04) {
+            return "#E32227";
+        }
+        return "#6D0E10";
+
     }
 
+    /**
+     * Method to process the query for the map.
+     * <p>
+     * This method processes the query for the map by iterating through the data and storing the data in a map.
+     * The map stores the borough name as the key and an array of the number of cases and deaths as the value.
+     * The map is then stored in the localBoroughRecords field.
+     */
+    private void processQuery() {
+        this.localBoroughRecords = new HashMap<>();
+        try {
+            while (data.next()) {
+                System.out.println(data.getString("borough"));
+
+                Integer[] records = {data.getInt("borough_cases"), data.getInt("borough_deaths")};
+                localBoroughRecords.put(data.getString("borough"), records);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error generating covid records");
+        }
+    }
 }

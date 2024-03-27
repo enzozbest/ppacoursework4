@@ -2,7 +2,6 @@ package gui.controllers;
 
 import gui.SceneInitialiser;
 import gui.components.AssetLoader;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -11,7 +10,6 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -73,7 +71,7 @@ public class WelcomeController extends AbstractController {
 
         try {
             parent = loader.load();
-            parent.getStylesheets().add(getClass().getResource("../styles/default.css").toExternalForm());
+            parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
         } catch (IOException e) {
             System.out.println("Error loading welcome-screen.fxml \n" + e.getMessage() + "\n" + e.getCause() + "\n" + e.getStackTrace());
         }
@@ -147,6 +145,8 @@ public class WelcomeController extends AbstractController {
         toDate = end;
         setStyleClass("clickable", true);
         setMouseEvents(true);
+        SceneInitialiser initialiser = SceneInitialiser.getInstance();
+        initialiser.updateScenes();
     }
 
     /**
@@ -236,7 +236,7 @@ public class WelcomeController extends AbstractController {
      */
     private void setWelcomeBackdrop() {
 
-        welcomeBackdrop.setImage(AssetLoader.WELCOME_BACKDROP);
+        welcomeBackdrop.setImage(AssetLoader.WELCOME_BACKGROUND);
 
         welcomeBackdrop.setFitWidth(960);
         welcomeBackdrop.setFitHeight(600);
@@ -272,27 +272,7 @@ public class WelcomeController extends AbstractController {
 
         guiSubtitle.setFitWidth(484);
         guiSubtitle.setFitHeight(66);
-
-        new Thread(() -> {
-            ColorAdjust colorAdjust = new ColorAdjust();
-            float delta = -1f / 24;
-            float brightness = 0.5f;
-
-            colorAdjust.setBrightness(brightness);
-            guiSubtitle.setEffect(colorAdjust);
-            while (true) {
-                for (int i = 0; i < 24; i++) {
-                    brightness += delta;
-                    colorAdjust.setBrightness(brightness);
-                    Platform.runLater(() -> guiSubtitle.setEffect(colorAdjust));
-                    try {
-                        Thread.sleep(42);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                delta *= -1;
-            }
-        }).start();
+        indefiniteFlash(guiSubtitle);
     }
 
     /**
@@ -302,7 +282,7 @@ public class WelcomeController extends AbstractController {
      * The character is then added to the screen as an ImageView.
      */
     private void setGuiCharacter() {
-        guiCharacter.setImage(AssetLoader.WELCOME_CHARACTER);
+        guiCharacter.setImage(AssetLoader.CHARACTER);
 
         guiCharacter.setFitWidth(340);
         guiCharacter.setFitHeight(424);

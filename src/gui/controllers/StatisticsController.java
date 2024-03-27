@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -39,7 +40,9 @@ public class StatisticsController extends AbstractController {
     @FXML
     private Label statistic, title, subtitle;
     @FXML
-    private ImageView background, next, prev, back, forward;
+    private ImageView background, next, prev, small_character;
+    @FXML
+    private Text back_text, forward_text;
     private int currentStatistic;
 
     /**
@@ -78,7 +81,7 @@ public class StatisticsController extends AbstractController {
 
         try {
             parent = loader.load();
-            parent.getStylesheets().add(getClass().getResource("../styles/default.css").toExternalForm());
+            parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
         } catch (IOException e) {
             System.out.println("Error loading the statistics frame! " + e.getCause() + e.getMessage() + e.getStackTrace());
         }
@@ -124,6 +127,7 @@ public class StatisticsController extends AbstractController {
         setBackButton();
         setNextButton();
         setPrevButton();
+        setSmallCharacter();
         setMouseEvents(true);
     }
 
@@ -160,11 +164,11 @@ public class StatisticsController extends AbstractController {
     private void displayAverageRetailAndRecreation() {
         title.setText("Average Retail and Recreation GMR");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.EQ_FONT);
-        subtitle.setFont(AssetLoader.EQ_FONT);
+        title.setFont(AssetLoader.RETRO_GAMING);
+        subtitle.setFont(AssetLoader.RETRO_GAMING);
         Double displayValue = (double) Math.round(statistics.get(0) * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.EQ_FONT);
+        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -175,11 +179,11 @@ public class StatisticsController extends AbstractController {
     private void displayAverageWorkplace() {
         title.setText("Average Workplace GMR");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.EQ_FONT);
-        subtitle.setFont(AssetLoader.EQ_FONT);
+        title.setFont(AssetLoader.RETRO_GAMING);
+        subtitle.setFont(AssetLoader.RETRO_GAMING);
         Double displayValue = (double) Math.round(statistics.get(1) * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.EQ_FONT);
+        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -191,11 +195,11 @@ public class StatisticsController extends AbstractController {
     private void displayPeriodDeaths() {
         title.setText("Deaths in the Period");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.EQ_FONT);
-        subtitle.setFont(AssetLoader.EQ_FONT);
+        title.setFont(AssetLoader.RETRO_GAMING);
+        subtitle.setFont(AssetLoader.RETRO_GAMING);
         Double displayValue = (double) Math.round(statistics.get(2) * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.EQ_FONT);
+        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -207,11 +211,11 @@ public class StatisticsController extends AbstractController {
     private void displayAverageTotalCases() {
         title.setText("Average Total Cases");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.EQ_FONT);
-        subtitle.setFont(AssetLoader.EQ_FONT);
+        title.setFont(AssetLoader.RETRO_GAMING);
+        subtitle.setFont(AssetLoader.RETRO_GAMING);
         Double displayValue = (double) Math.round(statistics.get(3) * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.EQ_FONT);
+        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -231,11 +235,8 @@ public class StatisticsController extends AbstractController {
      * style class "clickable" to the forward button to ensure correct styling.
      */
     private void setForwardButton() {
-        forward.setImage(AssetLoader.FORWARD);
-        forward.setFitWidth(110);
-        forward.setFitHeight(40);
-        forward.setPreserveRatio(true);
-        forward.getStyleClass().add("clickable");
+        forward_text.getStyleClass().add("clickable");
+        hoverFlash(forward_text);
     }
 
     /**
@@ -245,11 +246,8 @@ public class StatisticsController extends AbstractController {
      * style class "clickable" to the back button to ensure correct styling.
      */
     private void setBackButton() {
-        back.setImage(AssetLoader.BACK);
-        back.setFitWidth(110);
-        back.setFitHeight(40);
-        back.setPreserveRatio(true);
-        back.getStyleClass().add("clickable");
+        back_text.getStyleClass().add("clickable");
+        hoverFlash(back_text);
     }
 
     /**
@@ -259,7 +257,7 @@ public class StatisticsController extends AbstractController {
      * style class "clickable" to the next button to ensure correct styling.
      */
     private void setNextButton() {
-        next.setImage(AssetLoader.FORWARD);
+        next.setImage(AssetLoader.ARROW);
         next.setFitWidth(110);
         next.setFitHeight(40);
         next.setPreserveRatio(true);
@@ -273,11 +271,19 @@ public class StatisticsController extends AbstractController {
      * style class "clickable" to the previous button to ensure correct styling.
      */
     private void setPrevButton() {
-        prev.setImage(AssetLoader.BACK);
+        prev.setImage(AssetLoader.ARROW);
+        prev.setScaleX(-1);
         prev.setFitWidth(110);
         prev.setFitHeight(40);
         prev.setPreserveRatio(true);
         prev.getStyleClass().add("clickable");
+    }
+
+    private void setSmallCharacter() {
+        small_character.setImage(AssetLoader.SMALL_CHARACTER);
+        small_character.setFitWidth(275);
+        small_character.setFitHeight(264);
+        small_character.setPreserveRatio(true);
     }
 
     /**
@@ -318,11 +324,11 @@ public class StatisticsController extends AbstractController {
     private void setMouseEvents(boolean setting) {
         if (setting) {
             this.setStatsEvents(true);
-            super.setNavigationEvents(true, back, forward, "map", "graph");
+            super.setNavigationEvents(true, back_text, forward_text, "map", "graph");
             return;
         }
         this.setStatsEvents(false);
-        super.setNavigationEvents(false, back, forward, "map", "graph");
+        super.setNavigationEvents(false, back_text, forward_text, "map", "graph");
     }
 
 }

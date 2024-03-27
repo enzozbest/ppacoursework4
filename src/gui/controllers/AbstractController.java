@@ -1,14 +1,16 @@
 package gui.controllers;
 
 import gui.SceneInitialiser;
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import utils.sql.queries.Query;
-import utils.sql.queries.QueryProcessor;
 import utils.sql.queries.concurrent.QueryExecutor;
+import utils.sql.queries.processors.RecordGenerator;
 
 import java.sql.ResultSet;
 import java.util.concurrent.ExecutionException;
@@ -26,7 +28,7 @@ public abstract class AbstractController implements Controller {
 
     protected Query query;
     protected QueryExecutor executor;
-    protected QueryProcessor processor;
+    protected RecordGenerator processor;
 
     protected ResultSet data;
 
@@ -41,7 +43,6 @@ public abstract class AbstractController implements Controller {
      * @param queryString the query string to be executed.
      */
     protected AbstractController(String queryString) {
-
         if (queryString == null) {
             return;
         }
@@ -75,7 +76,7 @@ public abstract class AbstractController implements Controller {
      *
      * @param setting Whether to add or remove the mouse events
      */
-    protected void setNavigationEvents(boolean setting, ImageView back, ImageView forward, String backScene, String forwardScene) {
+    protected void setNavigationEvents(boolean setting, Node back, Node forward, String backScene, String forwardScene) {
         if (setting) {
             addClickEvent(back, backScene);
             addClickEvent(forward, forwardScene);
@@ -94,17 +95,45 @@ public abstract class AbstractController implements Controller {
      * This method adds the click event to the image view by setting the on mouse clicked event to change the scene
      * to the next scene.
      *
-     * @param imageView The image view to add the click event to
+     * @param node      The image view to add the click event to
      * @param nextScene The next scene to change to
      */
-    private void addClickEvent(ImageView imageView, String nextScene) {
-        imageView.setOnMouseClicked(mouseEvent -> {
+    private void addClickEvent(Node node, String nextScene) {
+        node.setOnMouseClicked(mouseEvent -> {
             Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
             Scene scene = SceneInitialiser.scenes.get(nextScene);
             stage.setScene(scene);
             scene.setCursor(Cursor.DEFAULT);
             scene.getRoot().setCursor(Cursor.DEFAULT);
         });
+    }
+
+    protected void hoverFlash(Node node) {
+        FadeTransition transition = createFadeTransition(node);
+        transition.setCycleCount(2);
+
+        node.setOnMouseEntered(event -> {
+            transition.setOnFinished(event1 -> transition.play());
+            transition.play();
+        });
+
+        node.setOnMouseExited(event -> {
+            transition.setOnFinished(event2 -> transition.stop());
+        });
+    }
+
+    protected void indefiniteFlash(Node node) {
+        FadeTransition transition = createFadeTransition(node);
+        transition.setCycleCount(Animation.INDEFINITE);
+        transition.play();
+    }
+
+    private FadeTransition createFadeTransition(Node node) {
+        FadeTransition transition = new FadeTransition(Duration.millis(1150), node);
+        transition.setFromValue(1.0);
+        transition.setToValue(0.3);
+        transition.setAutoReverse(true);
+        return transition;
     }
 
     public Scene getScene() {

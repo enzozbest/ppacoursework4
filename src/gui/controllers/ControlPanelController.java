@@ -4,6 +4,7 @@ import gui.components.BarChartPlotter;
 import gui.components.LinePlotter;
 import gui.components.Plotter;
 import gui.components.ScatterPlotter;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.chart.CategoryAxis;
@@ -22,7 +23,7 @@ import utils.sql.queries.processors.RecordGenerator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -44,7 +45,7 @@ public class ControlPanelController {
     private TextFlow genInfoFlow, gmrFlow, medFlow;
     private Future<ResultSet> queryResult;
     private int indexCurrentlyShowing;
-    private ArrayList<CovidData> data;
+    private ObservableList<CovidData> data;
 
     /**
      * Constructor for the GUIController.
@@ -92,12 +93,13 @@ public class ControlPanelController {
      */
     private void queryDatabase(String queryString) {
         Query query = new Query(queryString);
-        RecordGenerator processor = new RecordGenerator(new QueryExecutor(query));
+        QueryExecutor executor = new QueryExecutor(query);
         try {
-            processor.executeQuery(); //Query the database
+            RecordGenerator processor = new RecordGenerator(executor.runQuery().get());
+            //Query the database
             data = processor.processQuery(); //Process the result set and create an ArrayList
             Thread.sleep(100); //Ensure query is fully processed before closing connection
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | ExecutionException e) {
             System.out.println("Error fetching result set: " + e.getMessage() + "\n" + e.getStackTrace() + "\n" + e.getCause());
         } finally {
             query.closeConnection();
