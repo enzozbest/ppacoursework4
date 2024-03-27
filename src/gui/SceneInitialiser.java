@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,8 +19,8 @@ import java.util.Map;
  * The scenes are created in separate threads to allow the user to select the dates before the scenes are created.
  * The scenes are then stored in a map for easy access throughout the program.
  *
- * @author Enzo Bestetti (K23011872)
- * @version 2024.03.21
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @version 2024.03.27
  */
 public class SceneInitialiser {
 
@@ -60,6 +61,7 @@ public class SceneInitialiser {
      * The scenes are then stored in a map for easy access throughout the program.
      */
     private void createScenes() {
+        //Create the welcome scene
         welcomeController.beginLoading();
         Scene welcomeScene = welcomeController.getScene();
         scenes.put("welcome", welcomeScene);
@@ -78,14 +80,14 @@ public class SceneInitialiser {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    System.out.println("Error waiting for dates" + e.getMessage() + e.getCause() + Arrays.toString(e.getStackTrace()));
                 }
             }
 
             startDate = welcomeController.getFromDate();
             endDate = welcomeController.getToDate();
 
-            //Create other scenes once dates have been chosen by the user
+            //Create other scenes once dates have been chosen by the user on the JavaFX thread.
             Platform.runLater(() -> {
                 createMapScene();
                 createStatisticsScene();
@@ -139,6 +141,14 @@ public class SceneInitialiser {
         scenes.put("stats", statisticsScene);
     }
 
+    /**
+     * Method to create the graph scene.
+     * <p>
+     * Creates the graph scene and stores it in the scenes map.
+     * The graph scene is created in the main JavaFX thread, but this method should only be called once the start and
+     * end dates have been selected. In our implementation this is achieved by calling Platform.runLater() in the thread
+     * that checks for the selected dates.
+     */
     private void createGraphScene() {
         GraphController graphController = new GraphController(startDate, endDate);
         graphController.beginLoading();

@@ -10,30 +10,26 @@ import javafx.stage.Stage;
  * The welcome screen is then displayed to the user.
  *
  * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
- * @version 2024.03.20
+ * @version 2024.03.27
  */
-@SuppressWarnings("all")
 public class EpiQuest extends Application {
-
 
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Start method for the application.
+     */
     @Override
-    public void start(Stage stage) throws Exception {
-        SceneInitialiser sceneInitialiser = new SceneInitialiser();
+    public void start(Stage stage) {
+        SceneInitialiser.getInstance();
 
         stage.setScene(SceneInitialiser.scenes.get("welcome"));
-
         stage.setResizable(false);
-
-
         stage.setTitle("EpiQuest");
         stage.show();
-
     }
-
 }
 
 

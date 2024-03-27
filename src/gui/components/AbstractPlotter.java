@@ -6,16 +6,15 @@ import javafx.scene.chart.XYChart;
 
 import java.sql.ResultSet;
 
-@SuppressWarnings("unused")
 /**
  * Abstract class for plotting data.
  * This class is used to create a plotter for a specific type of chart.
  * It contains the basic methods and attributes that are common to all types of plotters.
  *
- * @author Enzo Bestetti
- * @version 2024.03.18
- * @see Plotter
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
+ * @version 2024.03.27
  */
+@SuppressWarnings("unused, rawtypes")
 public abstract class AbstractPlotter implements Plotter {
 
     protected final Axis xAxis;

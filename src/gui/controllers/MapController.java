@@ -21,25 +21,24 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
  * Class to control the map panel.
  * <p>
- * This class controls the map screen by setting the map panel and displaying the map of London with its boroughs
+ * This class controls the map screen by setting the Map panel and displaying the map of London with its boroughs
  * delineated to the user. The boroughs are coloured based on the percentage of deaths in each borough for the selected
  * date range.
  * <p>
  * The user can  hover over a borough to view the name of the borough, the total number of cases, and the number of
  * deaths. The borough is highlighted in black when hovered over, as well as being enlarged.
  * <p>
- * If a borough is clicked, the hover effects for the other boroughs are disabled. The basic data for the clicked
+ * If a borough is clicked, the enlargement on hover effect for the other boroughs is disabled. The basic data for the clicked
  * borough remains displayed, but an additional "View Borough" button appears. The clicked borough will remain
  * highlighted in black and enlarged. If a different borough is clicked, the old borough will no longer be highlighted
- * and enlarged, and those effects will rather apply to the newly clicked borough.
+ * and enlarged, and those effects will rather apply to the newly clicked borough. Hovering over the other boroughs will
+ * cause the borders of that borough to be highlighted in black, but the borough will not be enlarged.
  * <p>
  * Clicking on the "View Borough" button displays all the data for the selected borough for the selected date range in a
  * new window, in a table format.
@@ -101,12 +100,14 @@ public class MapController extends AbstractController {
 
         try {
             parent = loader.load();
-            parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
-            parent.getStylesheets().add(getClass().getResource("../../resources/styles/map-view.css").toExternalForm());
+            parent.getStylesheets().add(Objects.requireNonNull(getClass().getResource("../../resources/styles/default.css")).toExternalForm());
+            parent.getStylesheets().add(Objects.requireNonNull(getClass().getResource("../../resources/styles/map-view.css")).toExternalForm());
         } catch (IOException e) {
-            System.out.println("Error loading the map frame!" + e.getMessage() + e.getCause() + e.getStackTrace() + e.getLocalizedMessage());
+            System.out.println("Error loading the map frame!" + e.getMessage() + e.getCause() + Arrays.toString(e.getStackTrace()) + e.getLocalizedMessage());
         }
-        setMapPanel();
+
+        this.setMapPanel();
+
         scene = new Scene(parent, 960, 600, Color.WHITE);
     }
 
@@ -117,14 +118,14 @@ public class MapController extends AbstractController {
      * The map panel is then displayed to the user.
      */
     private void setMapPanel() {
-        processQuery();
-        setBackround();
-        setSelectLocationText();
-        setStackPane();
-        setBackButton();
-        setForwardButton();
-        setMouseEvents(true);
-        drawMap();
+        this.processQuery();
+        this.setBackround();
+        this.setSelectLocationText();
+        this.setStackPane();
+        this.setBackButton();
+        this.setForwardButton();
+        this.setMouseEvents(true);
+        this.drawMap();
     }
 
     /**
@@ -164,7 +165,7 @@ public class MapController extends AbstractController {
      */
     private void setBackButton() {
         back_text.getStyleClass().add("clickable");
-        hoverFlash(back_text);
+        super.hoverFlash(back_text);
     }
 
     /**
@@ -175,7 +176,7 @@ public class MapController extends AbstractController {
      */
     private void setForwardButton() {
         forward_text.getStyleClass().add("clickable");
-        hoverFlash(forward_text);
+        super.hoverFlash(forward_text);
     }
 
     /**
@@ -198,17 +199,24 @@ public class MapController extends AbstractController {
      * in the stack pane. The stack pane is then set to invisible.
      */
     private void setStackPane() {
-        setViewBoroughButton();
+        this.setViewBoroughButton();
         stack_borough_name.setVisible(false);
         stack_total_cases.setVisible(false);
         stack_borough_deaths.setVisible(false);
     }
 
+    /**
+     * Method to set the view borough button.
+     * <p>
+     * This method sets the view borough button by setting the text, visibility, style class, and indefinite flash for
+     * the button.
+     * The button is then set to invisible. It will not be displayed until a borough is clicked.
+     */
     private void setViewBoroughButton() {
         stack_button.setText("View Borough");
         stack_button.setVisible(false);
         stack_button.getStyleClass().add("clickable");
-        indefiniteFlash(stack_button);
+        super.indefiniteFlash(stack_button);
     }
 
     /**
@@ -240,7 +248,9 @@ public class MapController extends AbstractController {
 
                 map_group.getChildren().add(boroughBoundary);
             }
-            setBoroughColours();
+
+            this.setBoroughColours();
+
         } catch (IOException e) {
             System.out.println("Error reading the coordinates file! " + e.getMessage() + e.getCause() + e.getStackTrace());
         }
@@ -255,7 +265,7 @@ public class MapController extends AbstractController {
     private void setBoroughClickEvent(SVGPath boroughBoundary, String boroughName) {
         boroughBoundary.setOnMouseClicked(event -> {
 
-            disableHover();
+            this.disableHover();
 
             boroughBoundary.getStyleClass().add("clicked");
             boroughBoundary.getStyleClass().remove("clickable");
@@ -267,7 +277,7 @@ public class MapController extends AbstractController {
             stack_borough_name.setText(boroughName);
             stack_borough_name.setVisible(true);
 
-            sendEverythingToBack(boroughBoundary.getId());
+            this.setStylesOtherBoroughs(boroughBoundary.getId());
         });
     }
 
@@ -295,7 +305,7 @@ public class MapController extends AbstractController {
      *
      * @param id The id of the borough to send to the front
      */
-    private void sendEverythingToBack(String id) {
+    private void setStylesOtherBoroughs(String id) {
         ArrayList<String> ids = new ArrayList<>();
         for (Node path : map_group.getChildren()) {
             if (path.getId().equals(id)) {
@@ -324,9 +334,8 @@ public class MapController extends AbstractController {
     private void setBoroughHoverEvent(boolean setting, SVGPath boroughBoundary, String boroughName) {
         if (setting) {
             boroughBoundary.setOnMouseEntered(event -> {
-
                 boroughBoundary.getStyleClass().add("hoverable-scaling");
-                // boroughBoundary.setStyle("-fx-stroke-width: 1px; -fx-stroke: black; -fx-fill: transparent");
+
                 parent.lookup("#" + boroughBoundary.getId()).toFront();
 
                 stack_borough_name.setText(boroughName);
@@ -338,10 +347,7 @@ public class MapController extends AbstractController {
                 stack_borough_deaths.setText("Deaths: " + localBoroughRecords.get(boroughName)[1]);
                 stack_borough_deaths.setVisible(true);
             });
-
             boroughBoundary.setOnMouseExited(event -> {
-
-                //  boroughBoundary.setStyle("-fx-stroke-width: 1px; -fx-stroke: silver");
                 stack_borough_name.setVisible(false);
                 stack_total_cases.setVisible(false);
                 stack_borough_deaths.setVisible(false);
@@ -356,7 +362,6 @@ public class MapController extends AbstractController {
 
         boroughBoundary.setOnMouseEntered(event -> {
         });
-
         boroughBoundary.setOnMouseExited(event -> {
         });
     }
@@ -367,7 +372,7 @@ public class MapController extends AbstractController {
     private void disableHover() {
         for (Node path : map_group.getChildren()) {
             SVGPath svgPath = (SVGPath) path;
-            setBoroughHoverEvent(false, svgPath, path.getId().substring(5));
+            this.setBoroughHoverEvent(false, svgPath, path.getId().substring(5));
         }
     }
 
@@ -436,7 +441,6 @@ public class MapController extends AbstractController {
             return "#E32227";
         }
         return "#6D0E10";
-
     }
 
     /**
@@ -450,7 +454,6 @@ public class MapController extends AbstractController {
         this.localBoroughRecords = new HashMap<>();
         try {
             while (data.next()) {
-
                 Integer[] records = {data.getInt("borough_cases"), data.getInt("borough_deaths")};
                 localBoroughRecords.put(data.getString("borough"), records);
             }

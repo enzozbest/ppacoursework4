@@ -6,9 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-
 /**
- * This class is responsible for creating a query object that can be used to execute a SQL query on a database.
+ * This class is responsible for creating a Query object that can be used to execute a SQL query on a database.
  * <p>
  * The methods in this class can be used by an ExecutorService to submit the query represented by this object
  * to a separate thread for execution. For such, a connection with the database is established here and
@@ -21,7 +20,6 @@ import java.sql.SQLException;
  */
 public class Query {
 
-
     private final String queryString;
     private Connection conn;
 
@@ -32,18 +30,6 @@ public class Query {
      */
     public Query(String queryString) {
         this.queryString = queryString;
-    }
-
-    /**
-     * Close the connection to the database.
-     */
-    public void closeConnection() {
-        try {
-            conn.close();
-            // System.out.println("Connection to the database successfully closed.");
-        } catch (SQLException e) {
-            System.out.println("Error closing connection: " + e.getMessage() + "\n" + e.getStackTrace() + "\n" + e.getCause());
-        }
     }
 
     /**

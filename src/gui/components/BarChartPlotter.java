@@ -7,14 +7,17 @@ import javafx.scene.chart.XYChart;
 
 import java.sql.SQLException;
 
-@SuppressWarnings("all")
 /**
  * This class is used to plot a bar chart.
- * It extends the AbstractPlotter class and overrides the plot method.
+ * <p>
+ * The BarChartPlotter class is used to plot a bar chart with the data passed to it.
+ * The data is passed to the plotter as a ResultSet, and the plot method is called to plot the bar chart.
+ * The bar chart is then returned to the caller.
  *
- * @author Enzo Bestetti
- * @version 2024.03.18
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @version 2024.03.27
  */
+@SuppressWarnings("rawtypes, unchecked")
 public class BarChartPlotter extends AbstractPlotter {
 
     private final BarChart chart;
@@ -35,6 +38,7 @@ public class BarChartPlotter extends AbstractPlotter {
 
     /**
      * This method is used to plot the data as a bar chart.
+     * It iterates over the <it>ResultSet</it> and adds each piece of data to the plot.
      *
      * @return the chart with the data plotted
      */
@@ -47,6 +51,7 @@ public class BarChartPlotter extends AbstractPlotter {
         } catch (SQLException | NullPointerException e) {
             System.out.println("The data passed to the plotter is null! ");
         }
+
         this.chart.getData().add(series);
 
         return this.chart;

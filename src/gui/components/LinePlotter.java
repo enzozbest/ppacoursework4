@@ -9,11 +9,16 @@ import java.sql.SQLException;
 
 /**
  * A class to plot line charts.
+ * <p>
+ * This class extends the AbstractPlotter class and implements the plot method to plot a line chart.
+ * The LinePlotter class is used to plot a line chart with the data passed to it.
+ * The data is passed to the plotter as a ResultSet, and the plot method is called to plot the line chart.
+ * The line chart is then returned to the caller.
  *
- * @author Enzo Bestetti
- * @version 2024.03.18
- * @see AbstractPlotter
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @version 2024.03.27
  */
+@SuppressWarnings("rawtypes, unchecked")
 public class LinePlotter extends AbstractPlotter {
 
     private final LineChart<?, ?> chart;
@@ -46,6 +51,7 @@ public class LinePlotter extends AbstractPlotter {
         } catch (SQLException | NullPointerException e) {
             System.out.println("The data passed to the plotter is null! " + e.getMessage() + e.getCause() + e.getStackTrace());
         }
+        
         this.chart.getData().add(series);
 
         return this.chart;

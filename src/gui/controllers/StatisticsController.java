@@ -13,11 +13,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
- * Controller class for the statistics frame.
+ * Controller class for the Statistics screen.
  * <p>
- * This class provides the functionality for the statistics frame. It retrieves the statistics from the database and
+ * This class provides the functionality for the Statistics screen. It retrieves the statistics from the database and
  * displays them to the user. The statistics are displayed in the following order:
  * 1. Average Retail and Recreation GMR
  * 2. Average Workplace GMR
@@ -29,24 +30,24 @@ import java.util.ArrayList;
  * the forward button.
  *
  * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
- * @version 2024.03.25
+ * @version 2024.03.27
  */
+@SuppressWarnings("SqlResolve, SqlNoDataSourceInspection, ConstantConditions, Duplicates, unused")
 public class StatisticsController extends AbstractController {
 
-
-    private ArrayList<Double> statistics;
-    private AnchorPane parent;
-    private LocalDate startDate, endDate;
     @FXML
     private Label statistic, title, subtitle;
     @FXML
     private ImageView background, next, prev, small_character;
     @FXML
     private Text back_text, forward_text;
+    private ArrayList<Double> statistics;
+    private AnchorPane parent;
+    private LocalDate startDate, endDate;
     private int currentStatistic;
 
     /**
-     * Constructor for the AbstractController class.
+     * No-argument Constructor for the AbstractController class.
      */
     public StatisticsController() {
     }
@@ -83,16 +84,16 @@ public class StatisticsController extends AbstractController {
             parent = loader.load();
             parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
         } catch (IOException e) {
-            System.out.println("Error loading the statistics frame! " + e.getCause() + e.getMessage() + e.getStackTrace());
+            System.out.println("Error loading the statistics frame! " + e.getCause() + e.getMessage() + Arrays.toString(e.getStackTrace()));
         }
 
         statistics = retrieveStatistics();
 
-        setStatsPanel();
+        this.setStatsPanel();
 
         scene = new Scene(parent, 960, 600);
 
-        displayNextStatistic();
+        this.displayNextStatistic();
     }
 
     /**
@@ -108,7 +109,7 @@ public class StatisticsController extends AbstractController {
                 ret.add(data.getDouble(i));
             }
         } catch (SQLException e) {
-            System.out.println("Error generating result set! \n" + e.getMessage() + "\n" + e.getCause() + "\n" + e.getStackTrace());
+            System.out.println("Error generating result set! \n" + e.getMessage() + "\n" + e.getCause() + "\n" + Arrays.toString(e.getStackTrace()));
         }
         return ret;
     }
@@ -120,13 +121,13 @@ public class StatisticsController extends AbstractController {
      * font for the title, subtitle, and statistic to the EpiQuest font.
      */
     private void setStatsPanel() {
-        setBackground();
-        setForwardButton();
-        setBackButton();
-        setNextButton();
-        setPrevButton();
-        setSmallCharacter();
-        setMouseEvents(true);
+        this.setBackground();
+        this.setForwardButton();
+        this.setBackButton();
+        this.setNextButton();
+        this.setPrevButton();
+        this.setSmallCharacter();
+        this.setMouseEvents(true);
     }
 
     /**
@@ -146,10 +147,10 @@ public class StatisticsController extends AbstractController {
         int wrappedIndex = (currentStatistic + 4) % 4;
 
         switch (wrappedIndex) {
-            case 0 -> displayAverageRetailAndRecreation();
-            case 1 -> displayAverageWorkplace();
-            case 2 -> displayPeriodDeaths();
-            case 3 -> displayAverageTotalCases();
+            case 0 -> this.displayAverageRetailAndRecreation();
+            case 1 -> this.displayAverageWorkplace();
+            case 2 -> this.displayPeriodDeaths();
+            case 3 -> this.displayAverageTotalCases();
         }
     }
 
@@ -162,11 +163,9 @@ public class StatisticsController extends AbstractController {
     private void displayAverageRetailAndRecreation() {
         title.setText("Average Retail and Recreation GMR");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.RETRO_GAMING);
-        subtitle.setFont(AssetLoader.RETRO_GAMING);
-        Double displayValue = (double) Math.round(statistics.get(0) * 100) / 100;
+
+        Double displayValue = (double) Math.round(statistics.getFirst() * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -177,11 +176,9 @@ public class StatisticsController extends AbstractController {
     private void displayAverageWorkplace() {
         title.setText("Average Workplace GMR");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.RETRO_GAMING);
-        subtitle.setFont(AssetLoader.RETRO_GAMING);
+
         Double displayValue = (double) Math.round(statistics.get(1) * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -193,11 +190,9 @@ public class StatisticsController extends AbstractController {
     private void displayPeriodDeaths() {
         title.setText("Deaths in the Period");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.RETRO_GAMING);
-        subtitle.setFont(AssetLoader.RETRO_GAMING);
+
         Double displayValue = (double) Math.round(statistics.get(2) * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -209,11 +204,9 @@ public class StatisticsController extends AbstractController {
     private void displayAverageTotalCases() {
         title.setText("Average Total Cases");
         subtitle.setText("London: " + startDate + " to " + endDate);
-        title.setFont(AssetLoader.RETRO_GAMING);
-        subtitle.setFont(AssetLoader.RETRO_GAMING);
+
         Double displayValue = (double) Math.round(statistics.get(3) * 100) / 100;
         statistic.setText(displayValue + " (2d.p.)");
-        statistic.setFont(AssetLoader.RETRO_GAMING);
     }
 
     /**
@@ -234,7 +227,7 @@ public class StatisticsController extends AbstractController {
      */
     private void setForwardButton() {
         forward_text.getStyleClass().add("clickable");
-        hoverFlash(forward_text);
+        super.hoverFlash(forward_text);
     }
 
     /**
@@ -245,7 +238,7 @@ public class StatisticsController extends AbstractController {
      */
     private void setBackButton() {
         back_text.getStyleClass().add("clickable");
-        hoverFlash(back_text);
+        super.hoverFlash(back_text);
     }
 
     /**
@@ -328,5 +321,4 @@ public class StatisticsController extends AbstractController {
         this.setStatsEvents(false);
         super.setNavigationEvents(false, back_text, forward_text, "map", "graph");
     }
-
 }

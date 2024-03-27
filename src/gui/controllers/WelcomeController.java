@@ -18,33 +18,33 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Arrays;
 
 /**
- * Controller for the welcome screen.
+ * Controller for the Welcome screen.
  * <p>
- * This controller is responsible for the welcome screen, which is the first screen the user sees when they open the application.
- * The welcome screen allows the user to select a date range to view data for, and then proceed to the main application.
+ * This controller is responsible for the Welcome screen, which is the first screen the user sees when they open the application.
+ * The Welcome screen allows the user to select a date range to view data for, and then proceed to the main application.
  * The user can select a date range by selecting a start date and an end date from the drop-down menus.
  *
  * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
- * @version 2024.03.19
+ * @version 2024.03.27
  */
-@SuppressWarnings({"unused", "unchecked"})
+@SuppressWarnings("unused, unchecked, rawtypes")
 public class WelcomeController extends AbstractController {
 
     private final BooleanProperty isValidDateRange;
-    private AnchorPane parent;
     @FXML
     private ImageView welcomeBackdrop, guiTitle, guiSubtitle, guiCharacter;
     @FXML
     private StackPane stackPane;
     @FXML
     private ComboBox from, to;
-
+    private AnchorPane parent;
     private LocalDate fromDate, toDate;
 
     /**
-     * Constructor for the WelcomeController.
+     * No-argument constructor for the WelcomeController.
      */
     public WelcomeController() {
         super("SELECT DISTINCT `date` FROM covid_london ORDER BY `date` ASC");
@@ -57,12 +57,10 @@ public class WelcomeController extends AbstractController {
      * <p>
      * This method loads the welcome screen from the welcome-screen.fxml file and sets the controller to this class.
      * It then sets the available dates in the ListViews for the user to select from.
-     * The backdrop is added to the screen via the setWelcomeBackdrop() method, and the title and character are added
-     * via calls to setGuiTitle() and setGuiCharacter() methods respectively.
+     *
      * <p>
      * Listeners are added to the ListViews so that validation can be performed on the selected dates.
      * <p>
-     * Finally, it displays the welcome screen.
      */
     @Override
     public void beginLoading() {
@@ -78,18 +76,24 @@ public class WelcomeController extends AbstractController {
 
         isValidDateRange.set(false);
 
-        setWelcomePanel();
+        this.setWelcomePanel();
 
         scene = new Scene(parent, 960, 600);
     }
 
+    /**
+     * Method to set the welcome panel.
+     * <p>
+     * This method sets the welcome panel by setting the backdrop, title, subtitle, and character for the welcome screen.
+     * It also sets the available dates in the ListViews for the user to select from, and adds listeners to the ListViews.
+     */
     private void setWelcomePanel() {
-        setWelcomeBackdrop();
-        setGuiTitle();
-        setGuiSubtitle();
-        setGuiCharacter();
-        setAvailableDates();
-        addListeners();
+        this.setWelcomeBackdrop();
+        this.setGuiTitle();
+        this.setGuiSubtitle();
+        this.setGuiCharacter();
+        this.setAvailableDates();
+        this.addListeners();
     }
 
     /**
@@ -128,6 +132,7 @@ public class WelcomeController extends AbstractController {
         if (from.getValue() == null || to.getValue() == null) {
             return;
         }
+
         LocalDate start = formatDate(from.getValue().toString());
         LocalDate end = formatDate(to.getValue().toString());
 
@@ -135,16 +140,16 @@ public class WelcomeController extends AbstractController {
             isValidDateRange.set(false);
             fromDate = null;
             toDate = null;
-            setStyleClass("clickable", false);
-            setMouseEvents(false);
+            this.setStyleClass("clickable", false);
+            this.setMouseEvents(false);
             return;
         }
 
         isValidDateRange.set(true);
         fromDate = start;
         toDate = end;
-        setStyleClass("clickable", true);
-        setMouseEvents(true);
+        this.setStyleClass("clickable", true);
+        this.setMouseEvents(true);
         SceneInitialiser initialiser = SceneInitialiser.getInstance();
         initialiser.updateScenes();
     }
@@ -166,8 +171,6 @@ public class WelcomeController extends AbstractController {
                 stage.setScene(mapScene);
                 mapScene.setCursor(Cursor.DEFAULT);
                 mapScene.getRoot().setCursor(Cursor.DEFAULT);
-
-
             });
             return;
         }
@@ -218,13 +221,12 @@ public class WelcomeController extends AbstractController {
         try {
             while (data.next()) {
                 String date = data.getString("date").split(" ")[0];
-
                 from.getItems().add(date);
                 to.getItems().add(date);
             }
         } catch (SQLException e) {
             System.out.println("Error getting available dates \n" + e.getMessage() + "\n" + e.getCause() + "\n" +
-                    e.getStackTrace());
+                    Arrays.toString(e.getStackTrace()));
         }
     }
 
@@ -235,9 +237,7 @@ public class WelcomeController extends AbstractController {
      * The backdrop is then added to the screen as an ImageView.
      */
     private void setWelcomeBackdrop() {
-
         welcomeBackdrop.setImage(AssetLoader.WELCOME_BACKGROUND);
-
         welcomeBackdrop.setFitWidth(960);
         welcomeBackdrop.setFitHeight(600);
         welcomeBackdrop.setPreserveRatio(false);
@@ -252,11 +252,9 @@ public class WelcomeController extends AbstractController {
      */
     private void setGuiTitle() {
         guiTitle.setImage(AssetLoader.WELCOME_TITLE); //doesnt exist yet!
-
         guiTitle.setFitWidth(477);
         guiTitle.setFitHeight(114);
         guiTitle.setPreserveRatio(false);
-
     }
 
     /**
@@ -269,10 +267,9 @@ public class WelcomeController extends AbstractController {
      */
     private void setGuiSubtitle() {
         guiSubtitle.setImage(AssetLoader.ENTER_DATE_RANGE);
-
         guiSubtitle.setFitWidth(484);
         guiSubtitle.setFitHeight(66);
-        indefiniteFlash(guiSubtitle);
+        super.indefiniteFlash(guiSubtitle);
     }
 
     /**
@@ -283,7 +280,6 @@ public class WelcomeController extends AbstractController {
      */
     private void setGuiCharacter() {
         guiCharacter.setImage(AssetLoader.CHARACTER);
-
         guiCharacter.setFitWidth(340);
         guiCharacter.setFitHeight(424);
         guiCharacter.setPreserveRatio(false);
@@ -296,7 +292,7 @@ public class WelcomeController extends AbstractController {
         if (toDate == null) {
             return null;
         }
-        return formatDate(fromDate.toString());
+        return this.formatDate(fromDate.toString());
     }
 
     /**
@@ -306,6 +302,6 @@ public class WelcomeController extends AbstractController {
         if (toDate == null) {
             return null;
         }
-        return formatDate(toDate.toString());
+        return this.formatDate(toDate.toString());
     }
 }

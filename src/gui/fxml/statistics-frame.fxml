@@ -49,7 +49,7 @@
                         <HBox alignment="CENTER" prefHeight="127.0" prefWidth="780.0">
                             <children>
                                 <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                                <Label fx:id="title" prefHeight="25.0" prefWidth="1097.0" style="-fx-alignment: center; -fx-font-weight: bold;" text="Test" textAlignment="CENTER">
+                                <Label fx:id="title" prefHeight="25.0" prefWidth="1097.0" style="-fx-alignment: center; -fx-font-weight: bold; -fx-font-family: &quot;Retro Gaming&quot;;" text="Test" textAlignment="CENTER">
                                     <font>
                                         <Font size="20.0" />
                                     </font>
@@ -64,14 +64,14 @@
                         <HBox prefHeight="135.0" prefWidth="780.0">
                             <children>
                                 <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                                <Label fx:id="subtitle" prefHeight="16.0" prefWidth="1071.0" style="-fx-alignment: center" text="Label" textAlignment="CENTER" />
+                                <Label fx:id="subtitle" prefHeight="16.0" prefWidth="1071.0" style="-fx-alignment: center; -fx-font-family: &quot;Retro Gaming&quot;;" text="Label" textAlignment="CENTER" />
                                 <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                             </children>
                         </HBox>
                         <HBox prefHeight="86.0" prefWidth="780.0">
                             <children>
                                 <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                                <Label fx:id="statistic" prefHeight="19.0" prefWidth="1192.0" style="-fx-alignment: center;" text="Label">
+                                <Label fx:id="statistic" prefHeight="19.0" prefWidth="1192.0" style="-fx-alignment: center; -fx-font-family: &quot;Retro Gaming&quot;;" text="Label">
                                     <font>
                                         <Font size="15.0" />
                                     </font>

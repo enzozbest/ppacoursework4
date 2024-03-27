@@ -10,30 +10,34 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import utils.sql.queries.Query;
 import utils.sql.queries.concurrent.QueryExecutor;
-import utils.sql.queries.processors.RecordGenerator;
 
 import java.sql.ResultSet;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Abstract class to be extended by all controllers in the application.
+ * Abstract class to be extended by all Controllers in the application.
  * <p>
- * This class provides a common interface for all controllers to query the database and process the results.
- * It also provides a common interface for all controllers to handle the results of the query.
+ * This class provides the basic functionality for all controllers in the application. It provides the ability to query
+ * the database, set mouse events for the forward and back buttons, and add click events to image views. It also provides
+ * the ability to flash an image view when the mouse hovers over it.
+ * <p>
+ * This class is abstract and should not be instantiated directly. It is designed to be extended by other classes.
  *
- * @author Enzo Bestetti
- * @version 2024.03.18
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @version 2024.03.27
  */
 public abstract class AbstractController implements Controller {
 
     protected Query query;
-    protected QueryExecutor executor;
-    protected RecordGenerator processor;
 
     protected ResultSet data;
 
     protected Scene scene;
 
+    /**
+     * No-argument Constructor for the AbstractController class.
+     */
     protected AbstractController() {
     }
 
@@ -52,22 +56,6 @@ public abstract class AbstractController implements Controller {
     }
 
     /**
-     * Method to query the database.
-     */
-    private ResultSet queryDatabase(Query query) {
-
-        ResultSet ret;
-        try {
-            ret = new QueryExecutor(query).runQuery().get();
-            return ret;
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Error generating result set! \n" + e.getMessage() + "\n" + e.getCause() + "\n" + e.getStackTrace());
-        }
-        return null;
-    }
-
-
-    /**
      * Method to set the mouse events for the forward and back buttons.
      * <p>
      * This method sets the mouse events for the forward and back buttons by adding or removing the specified events
@@ -78,11 +66,10 @@ public abstract class AbstractController implements Controller {
      */
     protected void setNavigationEvents(boolean setting, Node back, Node forward, String backScene, String forwardScene) {
         if (setting) {
-            addClickEvent(back, backScene);
-            addClickEvent(forward, forwardScene);
+            this.addClickEvent(back, backScene);
+            this.addClickEvent(forward, forwardScene);
             return;
         }
-
         back.setOnMouseClicked(mouseEvent -> {
         });
         forward.setOnMouseClicked(mouseEvent -> {
@@ -108,6 +95,14 @@ public abstract class AbstractController implements Controller {
         });
     }
 
+    /**
+     * Method to flash a node when the mouse hovers over it.
+     * <p>
+     * This method creates a fade transition to flash the node when the mouse hovers over it. The transition is played
+     * when the mouse enters the node. The transition is stopped when the mouse exits the node.
+     *
+     * @param node The node to flash
+     */
     protected void hoverFlash(Node node) {
         FadeTransition transition = createFadeTransition(node);
         transition.setCycleCount(2);
@@ -117,17 +112,31 @@ public abstract class AbstractController implements Controller {
             transition.play();
         });
 
-        node.setOnMouseExited(event -> {
-            transition.setOnFinished(event2 -> transition.stop());
-        });
+        node.setOnMouseExited(event -> transition.setOnFinished(event2 -> transition.stop()));
     }
 
+    /**
+     * Method to indefinitely flash a node.
+     * <p>
+     * This method creates a fade transition to flash the node indefinitely. The transition is played indefinitely.
+     *
+     * @param node The node to flash
+     */
     protected void indefiniteFlash(Node node) {
         FadeTransition transition = createFadeTransition(node);
         transition.setCycleCount(Animation.INDEFINITE);
         transition.play();
     }
 
+    /**
+     * Method to create a fade transition.
+     * <p>
+     * This method creates a fade transition for the specified node. The transition is set to fade from 1.0 to 0.3 and
+     * back to 1.0. The duration of the transition is set to 1150 milliseconds.
+     *
+     * @param node The node to create the fade transition for
+     * @return The fade transition
+     */
     private FadeTransition createFadeTransition(Node node) {
         FadeTransition transition = new FadeTransition(Duration.millis(1150), node);
         transition.setFromValue(1.0);
@@ -136,6 +145,28 @@ public abstract class AbstractController implements Controller {
         return transition;
     }
 
+    /**
+     * Method to query the database.
+     * <p>
+     * This method queries the database using the provided query object. It then returns the result set from the query.
+     *
+     * @param query The query object to be executed
+     * @return The result set from the query
+     */
+    private ResultSet queryDatabase(Query query) {
+        ResultSet ret;
+        try {
+            ret = new QueryExecutor(query).runQuery().get();
+            return ret;
+        } catch (InterruptedException | ExecutionException e) {
+            System.out.println("Error generating result set! \n" + e.getMessage() + "\n" + e.getCause() + "\n" + Arrays.toString(e.getStackTrace()));
+        }
+        return null;
+    }
+
+    /**
+     * @return The scene represented by the Controller
+     */
     public Scene getScene() {
         return scene;
     }

@@ -8,8 +8,8 @@ import java.sql.ResultSet;
  * An interface to plot charts.
  * <p>
  *
- * @author Enzo Bestetti
- * @version 2024.03.18
+ * @author Enzo Bestetti (K23011872)
+ * @version 2024.03.27
  */
 public interface Plotter {
 

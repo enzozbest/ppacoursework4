@@ -1,0 +1,7 @@
+.clickable {
+    -fx-font-size: 18px;
+}
+
+.clickable:hover {
+    -fx-cursor: hand;
+}
