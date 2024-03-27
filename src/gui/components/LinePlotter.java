@@ -41,10 +41,10 @@ public class LinePlotter extends AbstractPlotter {
     public Chart plot() {
         try {
             while (data.next()) {
-                series.getData().add(new XYChart.Data<>(data.getString("month"), data.getInt("total_cases")));
+                series.getData().add(new XYChart.Data<>(data.getString("month") + "/" + data.getString("year"), data.getInt("total_deaths")));
             }
         } catch (SQLException | NullPointerException e) {
-            System.out.println("The data passed to the plotter is null! ");
+            System.out.println("The data passed to the plotter is null! " + e.getMessage() + e.getCause() + e.getStackTrace());
         }
         this.chart.getData().add(series);
 

@@ -1,6 +1,5 @@
 package gui.components;
 
-
 import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 

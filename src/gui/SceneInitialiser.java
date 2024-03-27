@@ -1,5 +1,6 @@
 package gui;
 
+import gui.controllers.GraphController;
 import gui.controllers.MapController;
 import gui.controllers.StatisticsController;
 import gui.controllers.WelcomeController;
@@ -70,7 +71,6 @@ public class SceneInitialiser {
 
     /**
      * Method to wait for the user to select the start and end dates.
-     *
      */
     public void waitForDates() {
         new Thread(() -> {
@@ -89,6 +89,7 @@ public class SceneInitialiser {
             Platform.runLater(() -> {
                 createMapScene();
                 createStatisticsScene();
+                createGraphScene();
             });
         }).start();
     }
@@ -102,6 +103,7 @@ public class SceneInitialiser {
     public void updateScenes() {
         scenes.remove("map");
         scenes.remove("stats");
+        scenes.remove("graph");
         waitForDates();
     }
 
@@ -135,5 +137,13 @@ public class SceneInitialiser {
         Scene statisticsScene = statisticsController.getScene();
 
         scenes.put("stats", statisticsScene);
+    }
+
+    private void createGraphScene() {
+        GraphController graphController = new GraphController(startDate, endDate);
+        graphController.beginLoading();
+        Scene graphScene = graphController.getScene();
+
+        scenes.put("graph", graphScene);
     }
 }

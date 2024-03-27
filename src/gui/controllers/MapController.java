@@ -450,7 +450,6 @@ public class MapController extends AbstractController {
         this.localBoroughRecords = new HashMap<>();
         try {
             while (data.next()) {
-                System.out.println(data.getString("borough"));
 
                 Integer[] records = {data.getInt("borough_cases"), data.getInt("borough_deaths")};
                 localBoroughRecords.put(data.getString("borough"), records);

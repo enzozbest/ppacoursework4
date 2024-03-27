@@ -42,7 +42,7 @@ public class BarChartPlotter extends AbstractPlotter {
     public Chart plot() {
         try {
             while (data.next()) {
-                series.getData().add(new XYChart.Data<>(data.getString("borough"), data.getInt("total_cases")));
+                series.getData().add(new XYChart.Data<>(data.getString("borough"), data.getInt("average_statistic")));
             }
         } catch (SQLException | NullPointerException e) {
             System.out.println("The data passed to the plotter is null! ");

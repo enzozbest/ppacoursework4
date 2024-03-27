@@ -1,3 +1,4 @@
+/*
 package gui.controllers;
 
 import gui.components.BarChartPlotter;
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+*/
 /**
  * This class is the controller for the control panel window. This window displays general control structures that are
  * used to test the functionality of the application. It is not the final version of the application's GUI, but it is
@@ -33,7 +35,79 @@ import java.util.concurrent.Future;
  *
  * @author Enzo Bestetti (K23011872)
  * @version 2024.03.18
- */
+ * <p>
+ * Constructor for the GUIController.
+ * It initialises the DatabaseConnector and sets the indexCurrentlyShowing to 0.
+ * The indexCurrentlyShowing is used to keep track of which CovidData object is currently being displayed.
+ * The DatabaseConnector is used to connect to the database to execute queries.
+ * <p>
+ * This method is called when the GUI is being loaded.
+ * It loads the control-panel.fxml file.
+ * @return The GridPane that contains the main application window.
+ * <p>
+ * This method is called when the user clicks the "Query Database" button.
+ * <p>
+ * Create a new Query object and process it on a separate thread.
+ * <p>
+ * This method is called when the user clicks the "Next" button.
+ * It increments the date by one day and calls the method that will run the query with the new date.
+ * <p>
+ * This method is called when the user clicks the "Previous" button.
+ * It decrements the date by one day and calls the method that will run the query with the new date.
+ * <p>
+ * This method is called when the user clicks the "Next Record" button.
+ * It updates the GUI with the data from the new CovidData object,
+ * representing a different borough of London and its Covid-related data.
+ * @throws NullPointerException if the data list has not been initialised yet
+ * @throws ArithmeticException  if the data list is empty.
+ * <p>
+ * This method is called when the user clicks the "Previous Record" button.
+ * It updates the GUI with the data from the new CovidData object,
+ * representing a different borough of London and its Covid-related data.
+ * @throws NullPointerException if the data list has not been initialised yet.
+ * @throws ArithmeticException  if the data list is empty.
+ * <p>
+ * This method is called when the user clicks the "Line Chart" button.
+ * It creates a new PlotController and a new LinePlotter to display the data in a line chart.
+ * The line chart will display the total cases for the borough over time.
+ * The data will be displayed for the last 180 days before and after the date selected by the user.
+ * The line chart will be displayed in a new window.
+ * <p>
+ * This method is called when the user clicks the "Bar Chart" button.
+ * It creates a new PlotController and a new BarChartPlotter to display the data in a bar chart.
+ * The bar chart will display the total cases for each borough on the date selected by the user.
+ * The bar chart will be displayed in a new window.
+ * <p>
+ * This method is called when the user clicks the "Scatter Chart" button.
+ * It creates a new PlotController and a new ScatterPlotter to display the data in a scatter chart.
+ * The scatter chart will display the total cases for the borough over time.
+ * The data will be displayed for the last 180 days before and after the date selected by the user.
+ * The scatter chart will be displayed in a new window.
+ * <p>
+ * This method is called to update the GUI with the data from a CovidData object.
+ * It updates the general information, the Google Mobility Report information and the medical information.
+ * It also updates the indexCurrentlyShowing to keep track of which CovidData object is currently being displayed.
+ * This is necessary because the method is called from a different thread.
+ * @param data The CovidData object to be displayed in the GUI.
+ * <p>
+ * This method is called to update the GUI with the general information from a CovidData object.
+ * It updates the TextFlow with the borough, total cases and total deaths.
+ * @param data The CovidData object to be displayed in the GUI.
+ * <p>
+ * This method is called to update the GUI with the Google Mobility Report information from a CovidData object.
+ * It updates the TextFlow with the GMR information for each category.
+ * @param data The CovidData object to be displayed in the GUI.
+ * <p>
+ * This method is called to update the GUI with the medical information from a CovidData object.
+ * It updates the TextFlow with the new cases and new deaths.
+ * @param data The CovidData object to be displayed in the GUI.
+ * <p>
+ * Introduce a delay by sleeping the thread for a given number of milliseconds.
+ * @param millis The number of milliseconds to sleep the thread for.
+ * <p>
+ * Ensure that the date picker does not return a null value.
+ *//*
+
 @SuppressWarnings("all")
 public class ControlPanelController {
 
@@ -47,22 +121,26 @@ public class ControlPanelController {
     private int indexCurrentlyShowing;
     private ObservableList<CovidData> data;
 
-    /**
-     * Constructor for the GUIController.
-     * It initialises the DatabaseConnector and sets the indexCurrentlyShowing to 0.
-     * The indexCurrentlyShowing is used to keep track of which CovidData object is currently being displayed.
-     * The DatabaseConnector is used to connect to the database to execute queries.
-     */
+    */
+/**
+ * Constructor for the GUIController.
+ * It initialises the DatabaseConnector and sets the indexCurrentlyShowing to 0.
+ * The indexCurrentlyShowing is used to keep track of which CovidData object is currently being displayed.
+ * The DatabaseConnector is used to connect to the database to execute queries.
+ *//*
+
     public ControlPanelController() {
         this.indexCurrentlyShowing = 0;
     }
 
-    /**
-     * This method is called when the GUI is being loaded.
-     * It loads the control-panel.fxml file.
-     *
-     * @return The GridPane that contains the main application window.
-     */
+    */
+/**
+ * This method is called when the GUI is being loaded.
+ * It loads the control-panel.fxml file.
+ *
+ * @return The GridPane that contains the main application window.
+ *//*
+
     public Pane beginLoading() {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/control-panel.fxml"));
@@ -77,9 +155,11 @@ public class ControlPanelController {
         return null;
     }
 
-    /**
-     * This method is called when the user clicks the "Query Database" button.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Query Database" button.
+ *//*
+
     @FXML
     private void queryButtonClicked() {
         ensureDateNotNull();
@@ -88,9 +168,11 @@ public class ControlPanelController {
         //deriveStatsButtonClicked();
     }
 
-    /**
-     * Create a new Query object and process it on a separate thread.
-     */
+    */
+/**
+ * Create a new Query object and process it on a separate thread.
+ *//*
+
     private void queryDatabase(String queryString) {
         Query query = new Query(queryString);
         QueryExecutor executor = new QueryExecutor(query);
@@ -106,10 +188,12 @@ public class ControlPanelController {
         }
     }
 
-    /**
-     * This method is called when the user clicks the "Next" button.
-     * It increments the date by one day and calls the method that will run the query with the new date.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Next" button.
+ * It increments the date by one day and calls the method that will run the query with the new date.
+ *//*
+
     @FXML
     private void nextDateButtonClicked() {
         ensureDateNotNull();
@@ -118,10 +202,12 @@ public class ControlPanelController {
         updateGUI(data.get(indexCurrentlyShowing % data.size()));
     }
 
-    /**
-     * This method is called when the user clicks the "Previous" button.
-     * It decrements the date by one day and calls the method that will run the query with the new date.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Previous" button.
+ * It decrements the date by one day and calls the method that will run the query with the new date.
+ *//*
+
     @FXML
     private void previousDateButtonClicked() {
         ensureDateNotNull();
@@ -130,42 +216,48 @@ public class ControlPanelController {
         updateGUI(data.get(indexCurrentlyShowing % data.size()));
     }
 
-    /**
-     * This method is called when the user clicks the "Next Record" button.
-     * It updates the GUI with the data from the new CovidData object,
-     * representing a different borough of London and its Covid-related data.
-     *
-     * @throws NullPointerException if the data list has not been initialised yet
-     * @throws ArithmeticException  if the data list is empty.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Next Record" button.
+ * It updates the GUI with the data from the new CovidData object,
+ * representing a different borough of London and its Covid-related data.
+ *
+ * @throws NullPointerException if the data list has not been initialised yet
+ * @throws ArithmeticException  if the data list is empty.
+ *//*
+
     @FXML
     private void nextRecordButtonClicked() throws NullPointerException, ArithmeticException {
         updateGUI(data.get((++indexCurrentlyShowing + data.size()) % data.size()));
     }
 
-    /**
-     * This method is called when the user clicks the "Previous Record" button.
-     * It updates the GUI with the data from the new CovidData object,
-     * representing a different borough of London and its Covid-related data.
-     *
-     * @throws NullPointerException if the data list has not been initialised yet.
-     * @throws ArithmeticException  if the data list is empty.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Previous Record" button.
+ * It updates the GUI with the data from the new CovidData object,
+ * representing a different borough of London and its Covid-related data.
+ *
+ * @throws NullPointerException if the data list has not been initialised yet.
+ * @throws ArithmeticException  if the data list is empty.
+ *//*
+
     @FXML
     private void previousRecordButtonClicked() throws NullPointerException, ArithmeticException {
         updateGUI(data.get((--indexCurrentlyShowing + data.size()) % data.size()));
     }
 
-    /**
-     * This method is called when the user clicks the "Line Chart" button.
-     * It creates a new PlotController and a new LinePlotter to display the data in a line chart.
-     * The line chart will display the total cases for the borough over time.
-     * The data will be displayed for the last 180 days before and after the date selected by the user.
-     * The line chart will be displayed in a new window.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Line Chart" button.
+ * It creates a new PlotController and a new LinePlotter to display the data in a line chart.
+ * The line chart will display the total cases for the borough over time.
+ * The data will be displayed for the last 180 days before and after the date selected by the user.
+ * The line chart will be displayed in a new window.
+ *//*
+
     @FXML
     private void lineButtonClicked() {
-        PlotController lineController = new PlotController("SELECT `date`, MONTH(`date`) AS month, total_cases, "
+        GraphController lineController = new GraphController("SELECT `date`, MONTH(`date`) AS month, total_cases, "
                 + "borough FROM covid_london WHERE borough='"
                 + data.get(indexCurrentlyShowing).borough() + "' "
                 + "AND `date` BETWEEN '" + datePicker.getValue().minusDays(180) + "' AND '"
@@ -177,46 +269,51 @@ public class ControlPanelController {
         lineController.showGraph(linePlotter);
     }
 
-    /**
-     * This method is called when the user clicks the "Bar Chart" button.
-     * It creates a new PlotController and a new BarChartPlotter to display the data in a bar chart.
-     * The bar chart will display the total cases for each borough on the date selected by the user.
-     * The bar chart will be displayed in a new window.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Bar Chart" button.
+ * It creates a new PlotController and a new BarChartPlotter to display the data in a bar chart.
+ * The bar chart will display the total cases for each borough on the date selected by the user.
+ * The bar chart will be displayed in a new window.
+ *//*
+
     @FXML
     private void barChartButtonClicked() {
-        PlotController bcController = new PlotController("SELECT borough, total_cases FROM covid_london WHERE date='" + datePicker.getValue() + "' GROUP BY borough;");
+        GraphController bcController = new GraphController("SELECT borough, total_cases FROM covid_london WHERE date='" + datePicker.getValue() + "' GROUP BY borough;");
 
         Plotter bcPlotter = new BarChartPlotter("Boroughs on this day", new CategoryAxis(), "Boroughs", new NumberAxis(), "Number of Cases");
 
         bcController.showGraph(bcPlotter);
     }
 
-    /**
-     * This method is called when the user clicks the "Scatter Chart" button.
-     * It creates a new PlotController and a new ScatterPlotter to display the data in a scatter chart.
-     * The scatter chart will display the total cases for the borough over time.
-     * The data will be displayed for the last 180 days before and after the date selected by the user.
-     * The scatter chart will be displayed in a new window.
-     */
+    */
+/**
+ * This method is called when the user clicks the "Scatter Chart" button.
+ * It creates a new PlotController and a new ScatterPlotter to display the data in a scatter chart.
+ * The scatter chart will display the total cases for the borough over time.
+ * The data will be displayed for the last 180 days before and after the date selected by the user.
+ * The scatter chart will be displayed in a new window.
+ *//*
+
     @FXML
     private void scatterButtonClicked() {
-        PlotController plotController = new PlotController("SELECT `date`, total_cases FROM covid_london WHERE borough ='" + data.get(indexCurrentlyShowing).borough() + "' AND `date` BETWEEN '" + datePicker.getValue().minusDays(180) + "' AND '" + datePicker.getValue().plusDays(180) + "' ORDER BY `date`;");
+        GraphController graphController = new GraphController();
         Plotter sPlotter = new ScatterPlotter("CV-19 Boroughs", new CategoryAxis(), "Boroughs", new NumberAxis(), "Number of Cases");
-        sPlotter.setData(plotController.getData());
 
-        plotController.showGraph(sPlotter);
+        graphController.showGraph(sPlotter);
 
     }
 
-    /**
-     * This method is called to update the GUI with the data from a CovidData object.
-     * It updates the general information, the Google Mobility Report information and the medical information.
-     * It also updates the indexCurrentlyShowing to keep track of which CovidData object is currently being displayed.
-     * This is necessary because the method is called from a different thread.
-     *
-     * @param data The CovidData object to be displayed in the GUI.
-     */
+    */
+/**
+ * This method is called to update the GUI with the data from a CovidData object.
+ * It updates the general information, the Google Mobility Report information and the medical information.
+ * It also updates the indexCurrentlyShowing to keep track of which CovidData object is currently being displayed.
+ * This is necessary because the method is called from a different thread.
+ *
+ * @param data The CovidData object to be displayed in the GUI.
+ *//*
+
     private void updateGUI(CovidData data) {
         updateGeneralInformation(data);
         updateGMRInformation(data);
@@ -224,12 +321,14 @@ public class ControlPanelController {
         indexCurrentlyShowing = this.data.indexOf(data);
     }
 
-    /**
-     * This method is called to update the GUI with the general information from a CovidData object.
-     * It updates the TextFlow with the borough, total cases and total deaths.
-     *
-     * @param data The CovidData object to be displayed in the GUI.
-     */
+    */
+/**
+ * This method is called to update the GUI with the general information from a CovidData object.
+ * It updates the TextFlow with the borough, total cases and total deaths.
+ *
+ * @param data The CovidData object to be displayed in the GUI.
+ *//*
+
     private void updateGeneralInformation(CovidData data) {
         genInfoFlow.getChildren().clear();
         genInfoFlow.getChildren().add(new Text("Borough: " + data.borough() + "\n"));
@@ -238,12 +337,14 @@ public class ControlPanelController {
         genInfoFlow.getChildren().add(new Text("Total Deaths: " + data.totalDeaths() + "\n"));
     }
 
-    /**
-     * This method is called to update the GUI with the Google Mobility Report information from a CovidData object.
-     * It updates the TextFlow with the GMR information for each category.
-     *
-     * @param data The CovidData object to be displayed in the GUI.
-     */
+    */
+/**
+ * This method is called to update the GUI with the Google Mobility Report information from a CovidData object.
+ * It updates the TextFlow with the GMR information for each category.
+ *
+ * @param data The CovidData object to be displayed in the GUI.
+ *//*
+
     private void updateGMRInformation(CovidData data) {
         gmrFlow.getChildren().clear();
         gmrFlow.getChildren().add(new Text("Retail & Recreation: " + data.retailAndRecreation() + "\n"));
@@ -254,23 +355,27 @@ public class ControlPanelController {
         gmrFlow.getChildren().add(new Text("Residential: " + data.residential() + "\n"));
     }
 
-    /**
-     * This method is called to update the GUI with the medical information from a CovidData object.
-     * It updates the TextFlow with the new cases and new deaths.
-     *
-     * @param data The CovidData object to be displayed in the GUI.
-     */
+    */
+/**
+ * This method is called to update the GUI with the medical information from a CovidData object.
+ * It updates the TextFlow with the new cases and new deaths.
+ *
+ * @param data The CovidData object to be displayed in the GUI.
+ *//*
+
     private void updateMedicalInformation(CovidData data) {
         medFlow.getChildren().clear();
         medFlow.getChildren().add(new Text("New Cases: " + data.newCases() + "\n"));
         medFlow.getChildren().add(new Text("New Deaths: " + data.newDeaths()));
     }
 
-    /**
-     * Introduce a delay by sleeping the thread for a given number of milliseconds.
-     *
-     * @param millis The number of milliseconds to sleep the thread for.
-     */
+    */
+/**
+ * Introduce a delay by sleeping the thread for a given number of milliseconds.
+ *
+ * @param millis The number of milliseconds to sleep the thread for.
+ *//*
+
     private void delayUpdate(int millis) {
         try {
             Thread.sleep(millis);
@@ -279,12 +384,15 @@ public class ControlPanelController {
         }
     }
 
-    /**
-     * Ensure that the date picker does not return a null value.
-     */
+    */
+/**
+ * Ensure that the date picker does not return a null value.
+ *//*
+
     private void ensureDateNotNull() {
         if (datePicker.getValue() == null) {
             datePicker.setValue(LocalDate.now());
         }
     }
 }
+*/

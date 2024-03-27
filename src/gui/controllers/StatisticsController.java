@@ -93,8 +93,6 @@ public class StatisticsController extends AbstractController {
         scene = new Scene(parent, 960, 600);
 
         displayNextStatistic();
-
-
     }
 
     /**
