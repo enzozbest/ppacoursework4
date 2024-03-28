@@ -29,8 +29,6 @@ import java.util.concurrent.ExecutionException;
  */
 public abstract class AbstractController implements Controller {
 
-    protected Query query;
-
     protected ResultSet data;
 
     protected Scene scene;
@@ -50,7 +48,6 @@ public abstract class AbstractController implements Controller {
         if (queryString == null) {
             return;
         }
-
         Query query = new Query(queryString);
         data = queryDatabase(query);
     }

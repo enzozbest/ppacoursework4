@@ -34,6 +34,7 @@ import java.util.Arrays;
 public class WelcomeController extends AbstractController {
 
     private final BooleanProperty isValidDateRange;
+    private int numberOfUpdates;
     @FXML
     private ImageView welcomeBackdrop, guiTitle, guiSubtitle, guiCharacter;
     @FXML
@@ -151,7 +152,13 @@ public class WelcomeController extends AbstractController {
         this.setStyleClass("clickable", true);
         this.setMouseEvents(true);
         SceneInitialiser initialiser = SceneInitialiser.getInstance();
-        initialiser.updateScenes();
+
+        numberOfUpdates = SceneInitialiser.numberOfUpdates;
+
+        //Check if it is the first time the scenes are created. If so, do not update. Otherwise, trigger update sequence.
+        if (numberOfUpdates >= 1) {
+            initialiser.updateScenes();
+        }
     }
 
     /**
@@ -251,7 +258,7 @@ public class WelcomeController extends AbstractController {
      * The title is then added to the screen as an ImageView.
      */
     private void setGuiTitle() {
-        guiTitle.setImage(AssetLoader.WELCOME_TITLE); //doesnt exist yet!
+        guiTitle.setImage(AssetLoader.WELCOME_TITLE);
         guiTitle.setFitWidth(477);
         guiTitle.setFitHeight(114);
         guiTitle.setPreserveRatio(false);

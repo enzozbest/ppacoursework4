@@ -23,6 +23,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -34,15 +36,16 @@ import java.util.concurrent.ExecutionException;
  * <p>
  *
  * @author Enzo Bestetti (K23011872)
- * @version 2024.03.18
+ * @version 2024.03.28
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class GraphController extends AbstractController {
-
 
     private final LocalDate startDate;
     private final LocalDate endDate;
-    private int indexCurrentlyShowing;
-    private AnchorPane parent;
+    private final ArrayList<String> boroughNames;
+    private final ArrayList<String> statistics;
+    private int numberGraphsDrawn;
     @FXML
     private Label title;
     @FXML
@@ -53,20 +56,54 @@ public class GraphController extends AbstractController {
     private HBox graph_container;
     @FXML
     private ComboBox combo_box;
-    private ArrayList<Chart> graphs;
+    private int indexCurrentlyShowing;
+    private AnchorPane parent;
 
     /**
      * The constructor for the PlotController class. It takes a string as a parameter and passes it to the
      * super class constructor.
      *
-     * @param
+     * @param startDate the start date for the data to be displayed.
+     * @param endDate   the end date for the data to be displayed.
      */
     public GraphController(LocalDate startDate, LocalDate endDate) {
         super(null);
 
         this.startDate = startDate;
         this.endDate = endDate;
+        this.boroughNames = new ArrayList<>();
+        this.statistics = new ArrayList<>();
+        this.initialQuery();
+
         indexCurrentlyShowing = 0;
+        numberGraphsDrawn = 0;
+    }
+
+    private void initialQuery() {
+        Query boroughQuery = new Query("SELECT DISTINCT borough FROM covid_london ORDER BY borough;");
+        Query statisticsQuery = new Query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'covid_london';");
+
+        QueryExecutor boroughExecutor = new QueryExecutor(boroughQuery);
+        QueryExecutor statisticsExecutor = new QueryExecutor(statisticsQuery);
+
+        try {
+
+            ResultSet boroughResultSet = boroughExecutor.runQuery().get();
+            ResultSet statisticsResultSet = statisticsExecutor.runQuery().get();
+
+            while (boroughResultSet.next()) {
+                boroughNames.add(boroughResultSet.getString("borough"));
+            }
+
+            while (statisticsResultSet.next()) {
+                statistics.add(statisticsResultSet.getString("COLUMN_NAME"));
+            }
+            statistics.remove("date");
+            statistics.remove("borough");
+
+        } catch (SQLException | InterruptedException | ExecutionException e) {
+            System.out.println("Error Retrieving metadata from database! \n" + e.getMessage() + "\n" + e.getCause() + "\n" + Arrays.toString(e.getStackTrace()));
+        }
     }
 
     /**
@@ -82,31 +119,35 @@ public class GraphController extends AbstractController {
 
         try {
             parent = loader.load();
-            parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
+            parent.getStylesheets().add(Objects.requireNonNull(getClass().getResource("../../resources/styles/default.css")).toExternalForm());
         } catch (Exception e) {
-            System.out.println("Error loading the FXML file for the graph-frame! \n" + e.getCause() + "\n" + e.getMessage() + "\n" + e.getStackTrace());
+            System.out.println("Error loading the FXML file for the graph-frame! \n" + e.getCause() + "\n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
         }
 
         scene = new Scene(parent, 960, 600);
 
-        setGraphPanel();
+        this.setGraphPanel();
     }
 
     private void setGraphPanel() {
-        setBackground();
-        setBackButton();
-        setForwardButton();
-        setNextButton();
-        setPrevButton();
+        this.setBackground();
+        this.setBackButton();
+        this.setForwardButton();
+        this.setNextButton();
+        this.setPrevButton();
         this.setNavigationEvents(true);
-        drawLineGraph();
-        addListeners();
+        this.addListener();
+        this.populateComboBoxBoroughs();
+        this.drawLineGraph();
     }
 
-    private void addListeners() {
+    private void addListener() {
         combo_box.valueProperty().addListener((observableValue, o, t1) -> {
+            if (numberGraphsDrawn < 1) {
+                return;
+            }
             graph_container.getChildren().clear();
-            if (combo_box.getItems().contains("Barking And Dagenham")) {
+            if (boroughNames.contains(t1)) {
                 drawLineGraph();
                 return;
             }
@@ -121,7 +162,6 @@ public class GraphController extends AbstractController {
         background.setPreserveRatio(true);
     }
 
-
     /**
      * Method to set the forward button.
      * <p>
@@ -130,7 +170,7 @@ public class GraphController extends AbstractController {
      */
     private void setForwardButton() {
         forward_text.getStyleClass().add("clickable");
-        hoverFlash(forward_text);
+        super.hoverFlash(forward_text);
     }
 
     /**
@@ -141,7 +181,7 @@ public class GraphController extends AbstractController {
      */
     private void setBackButton() {
         back_text.getStyleClass().add("clickable");
-        hoverFlash(back_text);
+        super.hoverFlash(back_text);
     }
 
     /**
@@ -156,6 +196,20 @@ public class GraphController extends AbstractController {
         next.setFitHeight(40);
         next.setPreserveRatio(true);
         next.getStyleClass().add("clickable");
+
+        next.setOnMouseClicked(event -> {
+            graph_container.getChildren().clear();
+            if (indexCurrentlyShowing == 0) {
+                indexCurrentlyShowing = 1;
+                populateComboBoxStatistics();
+                combo_box.setValue("retail_and_recreation");
+                return;
+            }
+            indexCurrentlyShowing = 0;
+            populateComboBoxBoroughs();
+            combo_box.setValue("Barking And Dagenham");
+        });
+
     }
 
     /**
@@ -171,21 +225,22 @@ public class GraphController extends AbstractController {
         prev.setFitHeight(40);
         prev.setPreserveRatio(true);
         prev.getStyleClass().add("clickable");
+
+        prev.setOnMouseClicked(event -> {
+            graph_container.getChildren().clear();
+            if (indexCurrentlyShowing == 0) {
+                indexCurrentlyShowing = 1;
+                populateComboBoxStatistics();
+                combo_box.setValue("retail_and_recreation");
+                return;
+            }
+            indexCurrentlyShowing = 0;
+            populateComboBoxBoroughs();
+            combo_box.setValue("Barking And Dagenham");
+        });
     }
 
     private void drawLineGraph() {
-        indexCurrentlyShowing = 0;
-
-        setGraphEvents();
-
-        if (!combo_box.getItems().contains("Barking and Dagenham")) {
-            populateComboBoxBoroughs();
-        }
-
-        if (combo_box.getValue() == null) {
-            combo_box.setValue("Barking and Dagenham");
-        }
-
         Plotter linePlotter = new LinePlotter("Total Deaths x Time", new CategoryAxis(), "Date", new NumberAxis(), "Total Deaths");
         title.setText("Currently Showing: Total Deaths over Time for " + combo_box.getValue());
 
@@ -196,63 +251,26 @@ public class GraphController extends AbstractController {
 
         QueryExecutor executor = new QueryExecutor(query);
 
+
+        ResultSet resultSet = null;
         try {
-            ResultSet resultSet = executor.runQuery().get();
-            linePlotter.setData(resultSet);
-        } catch (ExecutionException | InterruptedException e) {
-            System.out.println("Error drawing line graph");
+            resultSet = executor.runQuery().get();
+        } catch (InterruptedException | ExecutionException e) {
         }
+        linePlotter.setData(resultSet);
+
 
         Chart lineChart = linePlotter.plot();
         lineChart.setPrefWidth(800);
         lineChart.setLegendVisible(false);
 
         graph_container.getChildren().add(lineChart);
-    }
 
-    private void setGraphEvents() {
-        if (indexCurrentlyShowing == 0) {
-            prev.setOnMouseClicked(event -> {
-                drawBarChart();
-                combo_box.getItems().clear();
-                graph_container.getChildren().clear();
-            });
-            next.setOnMouseClicked(event -> {
-                drawBarChart();
-                combo_box.getItems().clear();
-                graph_container.getChildren().clear();
-            });
-            return;
-        }
-        prev.setOnMouseClicked(event -> {
-            drawLineGraph();
-            combo_box.getItems().clear();
-            graph_container.getChildren().clear();
-        });
-        next.setOnMouseClicked(event -> {
-            drawLineGraph();
-            combo_box.getItems().clear();
-            graph_container.getChildren().clear();
-        });
-    }
-
-    private void populateComboBoxBoroughs() {
-        combo_box.getItems().clear();
-        Query query = new Query("SELECT DISTINCT borough FROM covid_london ORDER BY borough");
-        QueryExecutor queryExecutor = new QueryExecutor(query);
-        try {
-            ResultSet boroughs = queryExecutor.runQuery().get();
-            while (boroughs.next()) {
-                combo_box.getItems().add(boroughs.getString("borough"));
-            }
-        } catch (SQLException | ExecutionException | InterruptedException e) {
-            System.out.println("Error populating box with boroughs");
-        }
+        numberGraphsDrawn++;
     }
 
     private void drawBarChart() {
         indexCurrentlyShowing = 1;
-        setGraphEvents();
 
         if (!combo_box.getItems().contains("retail_and_recreation")) {
             populateComboBoxStatistics();
@@ -282,26 +300,20 @@ public class GraphController extends AbstractController {
         barChart.setLegendVisible(false);
 
         graph_container.getChildren().add(barChart);
+
+        numberGraphsDrawn++;
+    }
+
+    private void populateComboBoxBoroughs() {
+        combo_box.getItems().clear();
+        combo_box.getItems().addAll(boroughNames);
+        combo_box.setValue("Barking And Dagenham");
     }
 
     private void populateComboBoxStatistics() {
         combo_box.getItems().clear();
-        Query query = new Query("SELECT COLUMN_NAME " +
-                "FROM INFORMATION_SCHEMA.COLUMNS " +
-                "WHERE TABLE_NAME = \"covid_london\";");
-        QueryExecutor queryExecutor = new QueryExecutor(query);
-        try {
-            ResultSet boroughs = queryExecutor.runQuery().get();
-            while (boroughs.next()) {
-                combo_box.getItems().add(boroughs.getString("COLUMN_NAME"));
-            }
-            combo_box.setValue("retail_and_recreation");
-            combo_box.getItems().remove("date");
-            combo_box.getItems().remove("borough");
-
-        } catch (SQLException | ExecutionException | InterruptedException e) {
-            System.out.println("Error populating box with boroughs" + e.getMessage() + e.getCause() + e.getStackTrace());
-        }
+        combo_box.getItems().addAll(statistics);
+        combo_box.setValue("retail_and_recreation");
     }
 
     private void setNavigationEvents(boolean setting) {
@@ -311,18 +323,4 @@ public class GraphController extends AbstractController {
         }
         super.setNavigationEvents(false, back_text, forward_text, "stats", "welcome");
     }
-
-    /**
-     * This method is called to display the plot of the data that is passed to it. It creates a new stage and
-     * sets the scene to the plot that is created by the plotter class.
-     *
-     * @param plotter the plotter object that is used to create the plot.
-     */
-    public void showGraph(Plotter plotter) {
-        plotter.setData(data);
-        Chart graph = plotter.plot();
-
-        graph_container.getChildren().add(graph);
-    }
-
 }

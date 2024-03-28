@@ -29,6 +29,7 @@ public class SceneInitialiser {
      * Scene object.
      */
     public static Map<String, Scene> scenes = new HashMap<>();
+    public static int numberOfUpdates;
     private static SceneInitialiser instance;
     private final WelcomeController welcomeController;
     private LocalDate startDate, endDate;
@@ -40,6 +41,7 @@ public class SceneInitialiser {
      */
     public SceneInitialiser() {
         welcomeController = new WelcomeController();
+        numberOfUpdates = 0;
         createScenes();
     }
 
@@ -86,7 +88,7 @@ public class SceneInitialiser {
 
             startDate = welcomeController.getFromDate();
             endDate = welcomeController.getToDate();
-
+            numberOfUpdates++;
             //Create other scenes once dates have been chosen by the user on the JavaFX thread.
             Platform.runLater(() -> {
                 createMapScene();
