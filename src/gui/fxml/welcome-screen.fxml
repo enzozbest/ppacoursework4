@@ -15,33 +15,29 @@
             </padding>
             <children>
                 <VBox>
-                    <children>
-                        <HBox fx:id="hBox" spacing="20.0">
-                            <children>
-                                <Label text="From:" textFill="WHITE"/>
-                                <ComboBox fx:id="from" prefWidth="150.0"/>
-                                <Label text="To:" textFill="WHITE"/>
-                                <ComboBox fx:id="to" prefWidth="150.0"/>
-                            </children>
-                        </HBox>
-                        <VBox prefHeight="97.0" prefWidth="484.0" VBox.vgrow="ALWAYS">
-                            <children>
-                                <Label fx:id="errorMessage" prefHeight="21.0" prefWidth="444.0"
-                                       style="-fx-font-weight: bold;" text="Error: Invalid date range"
-                                       textFill="#f20000" visible="false" wrapText="true">
-                                    <VBox.margin>
-                                        <Insets top="10.0"/>
-                                    </VBox.margin>
-                                </Label>
-                                <Region prefHeight="126.0" prefWidth="439.0" visible="false"/>
-                            </children>
-                        </VBox>
-                        <ImageView fx:id="guiTitle" fitHeight="114.0" fitWidth="477.0" pickOnBounds="true"
-                                   preserveRatio="true"/>
-                        <ImageView fx:id="guiSubtitle" fitHeight="66.0" fitWidth="484.0" pickOnBounds="true"
-                                   preserveRatio="true"/>
-                        <Region prefHeight="107.0" prefWidth="439.0" VBox.vgrow="ALWAYS"/>
-                    </children>
+                    <HBox fx:id="hBox" spacing="20.0" alignment="CENTER">
+                        <Label text="From:" textFill="WHITE"/>
+                        <ComboBox fx:id="from" prefWidth="150.0"/>
+                        <Label text="To:" textFill="WHITE"/>
+                        <ComboBox fx:id="to" prefWidth="150.0"/>
+                    </HBox>
+                    <VBox prefHeight="97.0" prefWidth="484.0" VBox.vgrow="ALWAYS">
+                        <children>
+                            <Label fx:id="errorMessage" prefHeight="21.0" prefWidth="444.0"
+                                   style="-fx-font-weight: bold;" text="Error: Invalid date range"
+                                   textFill="#f20000" visible="false" wrapText="true">
+                                <VBox.margin>
+                                    <Insets top="10.0"/>
+                                </VBox.margin>
+                            </Label>
+                            <Region prefHeight="126.0" prefWidth="439.0" visible="false"/>
+                        </children>
+                    </VBox>
+                    <ImageView fx:id="guiTitle" fitHeight="114.0" fitWidth="477.0" pickOnBounds="true"
+                               preserveRatio="true"/>
+                    <ImageView fx:id="guiSubtitle" fitHeight="66.0" fitWidth="484.0" pickOnBounds="true"
+                               preserveRatio="true"/>
+                    <Region prefHeight="107.0" prefWidth="439.0" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </children>
         </StackPane>

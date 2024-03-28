@@ -87,13 +87,9 @@ public class StatisticsController extends AbstractController {
             System.out.println("Error loading the statistics frame! " + e.getCause() + e.getMessage() + Arrays.toString(e.getStackTrace()));
         }
 
-        statistics = retrieveStatistics();
-
         this.setStatsPanel();
 
         scene = new Scene(parent, 960, 600);
-
-        this.displayNextStatistic();
     }
 
     /**
@@ -114,6 +110,7 @@ public class StatisticsController extends AbstractController {
         return ret;
     }
 
+
     /**
      * Method to set the statistics panel.
      * <p>
@@ -127,6 +124,12 @@ public class StatisticsController extends AbstractController {
         this.setNextButton();
         this.setPrevButton();
         this.setSmallCharacter();
+
+        super.runBackgroundTask(super.queryDatabase(), () -> {
+            statistics = retrieveStatistics();
+            displayNextStatistic();
+        });
+
         this.setMouseEvents(true);
     }
 
@@ -163,9 +166,7 @@ public class StatisticsController extends AbstractController {
     private void displayAverageRetailAndRecreation() {
         title.setText("Average Retail and Recreation GMR");
         subtitle.setText("London: " + startDate + " to " + endDate);
-
-        Double displayValue = (double) Math.round(statistics.getFirst() * 100) / 100;
-        statistic.setText(displayValue + " (2d.p.)");
+        statistic.setText(String.format("%.2f", statistics.get(0)));
     }
 
     /**
@@ -176,9 +177,7 @@ public class StatisticsController extends AbstractController {
     private void displayAverageWorkplace() {
         title.setText("Average Workplace GMR");
         subtitle.setText("London: " + startDate + " to " + endDate);
-
-        Double displayValue = (double) Math.round(statistics.get(1) * 100) / 100;
-        statistic.setText(displayValue + " (2d.p.)");
+        statistic.setText(String.format("%.2f", statistics.get(1)));
     }
 
     /**
@@ -190,9 +189,7 @@ public class StatisticsController extends AbstractController {
     private void displayPeriodDeaths() {
         title.setText("Deaths in the Period");
         subtitle.setText("London: " + startDate + " to " + endDate);
-
-        Double displayValue = (double) Math.round(statistics.get(2) * 100) / 100;
-        statistic.setText(displayValue + " (2d.p.)");
+        statistic.setText(String.format("%.2f", statistics.get(2)));
     }
 
     /**
@@ -204,9 +201,7 @@ public class StatisticsController extends AbstractController {
     private void displayAverageTotalCases() {
         title.setText("Average Total Cases");
         subtitle.setText("London: " + startDate + " to " + endDate);
-
-        Double displayValue = (double) Math.round(statistics.get(3) * 100) / 100;
-        statistic.setText(displayValue + " (2d.p.)");
+        statistic.setText(String.format("%.2f", statistics.get(3)));
     }
 
     /**

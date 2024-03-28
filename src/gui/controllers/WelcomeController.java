@@ -93,8 +93,8 @@ public class WelcomeController extends AbstractController {
         this.setGuiTitle();
         this.setGuiSubtitle();
         this.setGuiCharacter();
-        this.setAvailableDates();
         this.addListeners();
+        super.runBackgroundTask(super.queryDatabase(), this::setAvailableDates);
     }
 
     /**

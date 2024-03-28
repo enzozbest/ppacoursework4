@@ -1,6 +1,7 @@
 package gui.controllers;
 
 import gui.components.AssetLoader;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
@@ -14,7 +15,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import utils.sql.queries.Query;
-import utils.sql.queries.concurrent.QueryExecutor;
 
 import java.io.File;
 import java.io.IOException;
@@ -118,14 +118,19 @@ public class MapController extends AbstractController {
      * The map panel is then displayed to the user.
      */
     private void setMapPanel() {
-        this.processQuery();
         this.setBackround();
         this.setSelectLocationText();
-        this.setStackPane();
         this.setBackButton();
         this.setForwardButton();
         this.setMouseEvents(true);
-        this.drawMap();
+        this.setStackPane();
+        super.runBackgroundTask(super.queryDatabase(), () -> {
+            this.processQuery();
+            this.getPeriodDeaths();
+            this.drawMap();
+        });
+
+
     }
 
     /**
@@ -248,8 +253,6 @@ public class MapController extends AbstractController {
 
                 map_group.getChildren().add(boroughBoundary);
             }
-
-            this.setBoroughColours();
 
         } catch (IOException e) {
             System.out.println("Error reading the coordinates file! " + e.getMessage() + e.getCause() + e.getStackTrace());
@@ -376,6 +379,21 @@ public class MapController extends AbstractController {
         }
     }
 
+    private void getPeriodDeaths() {
+        Query query = new Query("SELECT sum(new_deaths) as period_deaths FROM covid_london WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "'");
+
+        Task<ResultSet> task = super.queryDatabase(query);
+        runBackgroundTask(task, () -> {
+            try {
+                ResultSet set = task.get();
+                int periodDeaths = set.next() ? set.getInt("period_deaths") : 0;
+                setBoroughColours(periodDeaths);
+            } catch (SQLException | ExecutionException | InterruptedException e) {
+
+            }
+        });
+    }
+
     /**
      * Method to set the colours of the boroughs on the map.
      * <p>
@@ -387,31 +405,21 @@ public class MapController extends AbstractController {
      * 3-4% deaths: red
      * 4%+ deaths: dark red
      */
-    private void setBoroughColours() {
-        try {
-            Query query = new Query("SELECT sum(new_deaths) as period_deaths FROM covid_london WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "'");
-            QueryExecutor executor1 = new QueryExecutor(query);
-
-            ResultSet data2 = executor1.runQuery().get();
-            int periodDeaths = data2.next() ? data2.getInt("period_deaths") : 0;
-
-            for (String boroughName : localBoroughRecords.keySet()) {
-                double death_percentage;
-                if (periodDeaths == 0) {
-                    death_percentage = 0;
-                } else {
-                    death_percentage = (double) localBoroughRecords.get(boroughName)[1] / periodDeaths;
-                }
-
-                String colour = findColour(death_percentage);
-                SVGPath tile = (SVGPath) parent.lookup("#tile_" + String.join("", boroughName.split(" ")).toLowerCase());
-                tile.setStyle("-fx-background-color: " + colour + "; -fx-fill: " + colour + ";");
-
+    private void setBoroughColours(int periodDeaths) {
+        for (String boroughName : localBoroughRecords.keySet()) {
+            double death_percentage;
+            if (periodDeaths == 0) {
+                death_percentage = 0;
+            } else {
+                death_percentage = (double) localBoroughRecords.get(boroughName)[1] / periodDeaths;
             }
-        } catch (SQLException | InterruptedException | ExecutionException e) {
-            System.out.println("Error setting borough colours! " + e.getMessage() + e.getCause() + e.getStackTrace());
+
+            String colour = findColour(death_percentage);
+            SVGPath tile = (SVGPath) parent.lookup("#tile_" + String.join("", boroughName.split(" ")).toLowerCase());
+            tile.setStyle("-fx-background-color: " + colour + "; -fx-fill: " + colour + ";");
         }
     }
+
 
     /**
      * Method to find the colour for the borough based on the number of deaths.

@@ -3,6 +3,7 @@ package gui.controllers;
 import gui.SceneInitialiser;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
+import javafx.concurrent.Task;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -12,7 +13,6 @@ import utils.sql.queries.Query;
 import utils.sql.queries.concurrent.QueryExecutor;
 
 import java.sql.ResultSet;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -30,8 +30,8 @@ import java.util.concurrent.ExecutionException;
 public abstract class AbstractController implements Controller {
 
     protected ResultSet data;
-
     protected Scene scene;
+    private Query query;
 
     /**
      * No-argument Constructor for the AbstractController class.
@@ -48,8 +48,7 @@ public abstract class AbstractController implements Controller {
         if (queryString == null) {
             return;
         }
-        Query query = new Query(queryString);
-        data = queryDatabase(query);
+        query = new Query(queryString);
     }
 
     /**
@@ -142,23 +141,67 @@ public abstract class AbstractController implements Controller {
         return transition;
     }
 
+    protected void runBackgroundTask(Task<ResultSet> task, Runnable onSucceeded) {
+
+        task.setOnSucceeded(event -> {
+            try {
+                data = task.get();
+            } catch (ExecutionException | InterruptedException e) {
+                System.out.println("Error processing background thread" + e.getMessage() + e.getCause());
+            }
+            onSucceeded.run();
+        });
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
+    }
+
     /**
      * Method to query the database.
      * <p>
      * This method queries the database using the provided query object. It then returns the result set from the query.
      *
-     * @param query The query object to be executed
      * @return The result set from the query
      */
-    private ResultSet queryDatabase(Query query) {
-        ResultSet ret;
-        try {
-            ret = new QueryExecutor(query).runQuery().get();
-            return ret;
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Error generating result set! \n" + e.getMessage() + "\n" + e.getCause() + "\n" + Arrays.toString(e.getStackTrace()));
-        }
-        return null;
+    protected Task<ResultSet> queryDatabase() {
+        Task<ResultSet> task = new Task<>() {
+            @Override
+            protected ResultSet call() {
+                try {
+                    ResultSet ret = new QueryExecutor(query).runQuery().get();
+                    return ret;
+                } catch (InterruptedException | ExecutionException e) {
+                    System.out.println("Error processing background thread" + e.getMessage() + e.getCause());
+                }
+                return null;
+            }
+        };
+        return task;
+    }
+
+    /**
+     * Method to query the database.
+     * <p>
+     * This method queries the database using the provided query object. It then returns the result set from the query.
+     *
+     * @return The result set from the query
+     */
+    protected Task<ResultSet> queryDatabase(Query query) {
+        Task<ResultSet> task = new Task<>() {
+            @Override
+            protected ResultSet call() {
+                try {
+                    ResultSet ret = new QueryExecutor(query).runQuery().get();
+                    return ret;
+                } catch (InterruptedException | ExecutionException e) {
+                    System.out.println("Error processing background thread" + e.getMessage() + e.getCause());
+                }
+                return null;
+            }
+        };
+        return task;
     }
 
     /**
