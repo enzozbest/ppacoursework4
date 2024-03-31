@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Controller for the Welcome screen.
@@ -27,20 +28,20 @@ import java.util.Arrays;
  * The Welcome screen allows the user to select a date range to view data for, and then proceed to the main application.
  * The user can select a date range by selecting a start date and an end date from the drop-down menus.
  *
- * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
-@SuppressWarnings("unused, unchecked, rawtypes")
 public class WelcomeController extends AbstractController {
 
     private final BooleanProperty isValidDateRange;
-    private int numberOfUpdates;
+
     @FXML
     private ImageView welcomeBackdrop, guiTitle, guiSubtitle, guiCharacter;
     @FXML
     private StackPane stackPane;
     @FXML
-    private ComboBox from, to;
+    private ComboBox<String> from, to;
+
     private AnchorPane parent;
     private LocalDate fromDate, toDate;
 
@@ -49,33 +50,29 @@ public class WelcomeController extends AbstractController {
      */
     public WelcomeController() {
         super("SELECT DISTINCT `date` FROM covid_london ORDER BY `date` ASC");
-        isValidDateRange = new SimpleBooleanProperty();
+        isValidDateRange = new SimpleBooleanProperty(false);
     }
-
 
     /**
      * Method to begin loading the welcome screen.
      * <p>
      * This method loads the welcome screen from the welcome-screen.fxml file and sets the controller to this class.
-     * It then sets the available dates in the ListViews for the user to select from.
-     *
-     * <p>
-     * Listeners are added to the ListViews so that validation can be performed on the selected dates.
-     * <p>
+     * It then calls the setWelcomePanel() method to set the welcome panel, which includes the backdrop, title, subtitle,
+     * and character for the welcome screen
      */
     @Override
     public void beginLoading() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/welcome-screen.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/fxml/welcome-screen.fxml"));
         loader.setController(this);
 
         try {
             parent = loader.load();
-            parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
+            parent.getStylesheets().add(Objects.requireNonNull(getClass()
+                    .getResource("../../resources/styles/default.css")).toExternalForm());
         } catch (IOException e) {
-            System.out.println("Error loading welcome-screen.fxml \n" + e.getMessage() + "\n" + e.getCause() + "\n" + e.getStackTrace());
+            System.out.println("Error loading welcome-screen.fxml \n" + e.getMessage() + "\n" + e.getCause() + "\n" +
+                    Arrays.toString(e.getStackTrace()));
         }
-
-        isValidDateRange.set(false);
 
         this.setWelcomePanel();
 
@@ -86,21 +83,24 @@ public class WelcomeController extends AbstractController {
      * Method to set the welcome panel.
      * <p>
      * This method sets the welcome panel by setting the backdrop, title, subtitle, and character for the welcome screen.
-     * It also sets the available dates in the ListViews for the user to select from, and adds listeners to the ListViews.
+     * It also sets the available dates in the ComboBoxes for the user to select from, and adds listeners to the ComboBoxes.
      */
     private void setWelcomePanel() {
         this.setWelcomeBackdrop();
         this.setGuiTitle();
         this.setGuiSubtitle();
         this.setGuiCharacter();
-        this.addListeners();
-        super.runBackgroundTask(super.queryDatabase(), this::setAvailableDates);
+
+        super.runBackgroundTask(super.queryDatabase(), () -> {
+            this.setAvailableDates();
+            this.addListeners();
+        });
     }
 
     /**
      * Method to add listeners to components of the GUI.
      * <p>
-     * This method adds listeners to eac <em>ComboBox</em> to watch for when the user selects the start and end dates from.
+     * This method adds listeners to each ComboBox to watch for when the user selects the start and end dates from.
      * These listeners call the validateDates() method to ensure that the selected date range is valid.
      * <p>
      * The isValidDateRange listener is added to the isValidDateRange property to change the subtitle image when the
@@ -134,8 +134,8 @@ public class WelcomeController extends AbstractController {
             return;
         }
 
-        LocalDate start = formatDate(from.getValue().toString());
-        LocalDate end = formatDate(to.getValue().toString());
+        LocalDate start = formatDate(from.getValue());
+        LocalDate end = formatDate(to.getValue());
 
         if (!(start.isBefore(end) || start.equals(end))) {
             isValidDateRange.set(false);
@@ -153,7 +153,7 @@ public class WelcomeController extends AbstractController {
         this.setMouseEvents(true);
         SceneInitialiser initialiser = SceneInitialiser.getInstance();
 
-        numberOfUpdates = SceneInitialiser.numberOfUpdates;
+        int numberOfUpdates = SceneInitialiser.numberOfUpdates;
 
         //Check if it is the first time the scenes are created. If so, do not update. Otherwise, trigger update sequence.
         if (numberOfUpdates >= 1) {
@@ -166,15 +166,13 @@ public class WelcomeController extends AbstractController {
      * <p>
      * This method sets the mouse events for the subtitle by adding or removing the specified events from the subtitle.
      * This is used to change the behaviour of the subtitle when the date range is valid or invalid.
-     *
-     * @param setting Whether to add or remove the mouse events
      */
-    private void setMouseEvents(boolean setting) {
-        if (setting) {
+    private void setMouseEvents(boolean setEventsFlag) {
+        if (setEventsFlag) {
             guiSubtitle.setOnMouseClicked(mouseEvent -> {
                 Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 
-                Scene mapScene = SceneInitialiser.scenes.get("map");
+                Scene mapScene = SceneInitialiser.SCENES.get("map");
                 stage.setScene(mapScene);
                 mapScene.setCursor(Cursor.DEFAULT);
                 mapScene.getRoot().setCursor(Cursor.DEFAULT);
@@ -190,9 +188,6 @@ public class WelcomeController extends AbstractController {
      * <p>
      * This method sets the style class for the subtitle by adding or removing the specified class from the subtitle.
      * This is used to change the appearance of the subtitle when the date range is valid or invalid.
-     *
-     * @param className The name of the style class to add or remove
-     * @param setting   Whether to add or remove the style class
      */
     private void setStyleClass(String className, boolean setting) {
         if (setting) {
@@ -206,23 +201,17 @@ public class WelcomeController extends AbstractController {
     /**
      * Method to format the date.
      * <p>
-     * This method formats the date by splitting the date string into its parts and creating a LocalDate object from it.
-     * This ensures that the date is in an appropriate format for display, as well as guarantees that the date does not
-     * contain any information about the time.
-     *
-     * @param sqlDate The date string to format, usually retrieved .from the database
-     * @return The formatted date as a LocalDate object
+     * This method parses the date string into a LocalDate object. This guarantees that the date does not contain any
+     * information about the time.
      */
     private LocalDate formatDate(String sqlDate) {
-        String[] dateParts = sqlDate.split("-");
-        return LocalDate.of(Integer.parseInt(dateParts[0]), Integer.parseInt(dateParts[1]), Integer.parseInt(dateParts[2]));
+        return LocalDate.parse(sqlDate);
     }
 
     /**
-     * Method to set the available dates in the ListViews.
+     * Method to set the available dates in the ComboBoxes.
      * <p>
-     * This method sets the available dates in the ListViews by iterating over the ResultSet from the database query.
-     * It adds each date to the ListViews for the user to select from, in an appropriate format, namely 'YYYY-MM-DD'.
+     * This method sets the available dates in the ComboBoxes by iterating over the ResultSet from the database query.
      */
     private void setAvailableDates() {
         try {
@@ -293,6 +282,8 @@ public class WelcomeController extends AbstractController {
     }
 
     /**
+     * Method to get the start date selected by the user.
+     *
      * @return The start date selected by the user.
      */
     public LocalDate getFromDate() {
@@ -303,6 +294,8 @@ public class WelcomeController extends AbstractController {
     }
 
     /**
+     * Method to get the end date selected by the user.
+     *
      * @return The end date selected by the user.
      */
     public LocalDate getToDate() {

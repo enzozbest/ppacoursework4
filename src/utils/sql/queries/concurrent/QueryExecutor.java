@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
  * The runQuery method retrieves the PreparedStatement from the Query object and executes it in a separate thread. It
  * returns a Future representing the ResultSet of the query.
  *
- * @author Enzo Bestetti (K23011872)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
 public class QueryExecutor {

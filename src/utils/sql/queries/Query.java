@@ -15,7 +15,7 @@ import java.sql.SQLException;
  * <p>
  * The connection is closed after the query is executed and its result set processed as required.
  *
- * @author Enzo Bestetti (K230118872)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.07
  */
 public class Query {

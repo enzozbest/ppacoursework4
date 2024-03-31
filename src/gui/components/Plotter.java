@@ -6,9 +6,8 @@ import java.sql.ResultSet;
 
 /**
  * An interface to plot charts.
- * <p>
  *
- * @author Enzo Bestetti (K23011872)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
 public interface Plotter {
@@ -26,5 +25,4 @@ public interface Plotter {
      * @param data the data to be plotted
      */
     void setData(ResultSet data);
-
 }

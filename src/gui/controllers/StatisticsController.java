@@ -29,10 +29,9 @@ import java.util.Arrays;
  * The user can also return to the map frame using the back button, as well as proceed forward to the Graphs screen using
  * the forward button.
  *
- * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
-@SuppressWarnings("SqlResolve, SqlNoDataSourceInspection, ConstantConditions, Duplicates, unused")
 public class StatisticsController extends AbstractController {
 
     @FXML
@@ -59,7 +58,8 @@ public class StatisticsController extends AbstractController {
      * @param endDate   The end date of the date range
      */
     public StatisticsController(LocalDate startDate, LocalDate endDate) {
-        super("SELECT avg(retail_and_recreation) AS avg_ret_rec, avg(workplaces) AS avg_wp, sum(new_deaths) AS period_deaths, avg(total_cases) AS avg_period_cases " +
+        super("SELECT avg(retail_and_recreation) AS avg_ret_rec, avg(workplaces) AS avg_wp, sum(new_deaths)" +
+                "AS period_deaths, avg(total_cases) AS avg_period_cases " +
                 "FROM covid_london " +
                 "WHERE date BETWEEN '" + startDate + "'  AND '" + endDate + "'");
         this.startDate = startDate;
@@ -77,7 +77,7 @@ public class StatisticsController extends AbstractController {
      */
     @Override
     public void beginLoading() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/statistics-frame.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/fxml/statistics-frame.fxml"));
         loader.setController(this);
 
         try {
@@ -94,8 +94,6 @@ public class StatisticsController extends AbstractController {
 
     /**
      * Method to retrieve the statistics from the database.
-     *
-     * @return An ArrayList of Doubles containing the statistics retrieved from the database
      */
     private ArrayList<Double> retrieveStatistics() {
         ArrayList<Double> ret = new ArrayList<>();
@@ -171,6 +169,7 @@ public class StatisticsController extends AbstractController {
 
     /**
      * Method to display the average workplace GMR.
+     * <p>
      * This method displays the average workplaces GMR in the date range specified by the user. The average workplaces
      * GMR is displayed to two decimal places.
      */
@@ -265,6 +264,11 @@ public class StatisticsController extends AbstractController {
         prev.getStyleClass().add("clickable");
     }
 
+    /**
+     * Method to set the small character image.
+     * <p>
+     * This method sets the small character image by setting the image, size, and preserve ratio for it.
+     */
     private void setSmallCharacter() {
         small_character.setImage(AssetLoader.SMALL_CHARACTER);
         small_character.setFitWidth(275);
@@ -278,11 +282,9 @@ public class StatisticsController extends AbstractController {
      * This method sets the mouse events for the next and previous buttons by adding or removing the specified events
      * from the buttons. This is used to change the behaviour of the buttons when the user is navigating between
      * different statistics.
-     *
-     * @param setting Whether to add or remove the mouse events
      */
-    private void setStatsEvents(boolean setting) {
-        if (setting) {
+    private void setStatsEvents(boolean setEventsFlag) {
+        if (setEventsFlag) {
             next.setOnMouseClicked(mouseEvent -> {
                 currentStatistic++;
                 displayNextStatistic();
@@ -304,11 +306,9 @@ public class StatisticsController extends AbstractController {
      * <p>
      * This method sets the mouse events for the subtitle by adding or removing the specified events from the subtitle.
      * This is used to change the behaviour of the subtitle when the date range is valid or invalid.
-     *
-     * @param setting Whether to add or remove the mouse events
      */
-    private void setMouseEvents(boolean setting) {
-        if (setting) {
+    private void setMouseEvents(boolean setEventsFlag) {
+        if (setEventsFlag) {
             this.setStatsEvents(true);
             super.setNavigationEvents(true, back_text, forward_text, "map", "graph");
             return;

@@ -1,7 +1,6 @@
 package gui.components;
 
 import javafx.scene.chart.Axis;
-import javafx.scene.chart.Chart;
 import javafx.scene.chart.XYChart;
 
 import java.sql.ResultSet;
@@ -12,33 +11,30 @@ import java.sql.ResultSet;
  * It contains the basic methods and attributes that are common to all types of plotters.
  *
  * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
- * @version 2024.03.27
+ * @version 2024.03.28
  */
-@SuppressWarnings("unused, rawtypes")
 public abstract class AbstractPlotter implements Plotter {
 
     protected final Axis xAxis;
     protected final Axis yAxis;
     protected final XYChart.Series series;
     protected ResultSet data;
-    protected Chart chart;
 
     /**
      * Constructor for the AbstractPlotter class.
      * It initializes the x and y axes and the series of the chart.
      *
-     * @param title  the title of the chart
      * @param xAxis  the x-axis of the chart
-     * @param xlabel the label of the x-axis
+     * @param xLabel the label of the x-axis
      * @param yAxis  the y-axis of the chart
-     * @param ylabel the label of the y-axis
+     * @param yLabel the label of the y-axis
      */
-    protected AbstractPlotter(String title, Axis xAxis, String xlabel, Axis yAxis, String ylabel) {
+    protected AbstractPlotter(Axis xAxis, String xLabel, Axis yAxis, String yLabel) {
         this.xAxis = xAxis;
-        this.xAxis.setLabel(xlabel);
+        this.xAxis.setLabel(xLabel);
 
         this.yAxis = yAxis;
-        this.yAxis.setLabel(ylabel);
+        this.yAxis.setLabel(yLabel);
 
         series = new XYChart.Series();
     }

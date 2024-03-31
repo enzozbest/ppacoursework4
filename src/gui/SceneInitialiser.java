@@ -15,11 +15,9 @@ import java.util.Map;
 /**
  * Class to create the scenes for the application.
  * <p>
- * This class creates the scenes for the application and stores them in a map.
- * The scenes are created in separate threads to allow the user to select the dates before the scenes are created.
- * The scenes are then stored in a map for easy access throughout the program.
+ * This class creates the scenes for the application and stores them in a map, for easy access throughout the program.
  *
- * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
 public class SceneInitialiser {
@@ -28,7 +26,11 @@ public class SceneInitialiser {
      * Map to store the scenes for the application. The key is a string representing the scene, and the value is the
      * Scene object.
      */
-    public static Map<String, Scene> scenes = new HashMap<>();
+    public static final Map<String, Scene> SCENES = new HashMap<>();
+
+    /**
+     * Integer to store the number of times the user has updated the date range.
+     */
     public static int numberOfUpdates;
     private static SceneInitialiser instance;
     private final WelcomeController welcomeController;
@@ -37,7 +39,7 @@ public class SceneInitialiser {
     /**
      * Constructor for the Scenes class.
      * <p>
-     * Creates the scenes for the application.
+     * Creates the scenes for the application, and initialises fields.
      */
     public SceneInitialiser() {
         welcomeController = new WelcomeController();
@@ -46,6 +48,8 @@ public class SceneInitialiser {
     }
 
     /**
+     * Method to get the instance of the SceneInitialiser class.
+     *
      * @return the instance of the SceneInitialiser class.
      */
     public static SceneInitialiser getInstance() {
@@ -58,25 +62,24 @@ public class SceneInitialiser {
     /**
      * Method to create the scenes for the application.
      * <p>
-     * Creates the welcome scene, map scene, and statistics scene.
-     * The scenes are created in separate threads to allow the user to select the dates before the scenes are created.
+     * Creates the welcome scene, map scene, statistics scene, and graph scene.
      * The scenes are then stored in a map for easy access throughout the program.
      */
     private void createScenes() {
-        //Create the welcome scene
+        // Create the welcome scene
         welcomeController.beginLoading();
         Scene welcomeScene = welcomeController.getScene();
-        scenes.put("welcome", welcomeScene);
+        SCENES.put("welcome", welcomeScene);
 
-        //Use a separate thread to wait for the user to select the dates before setting the fields and creating the next
-        // scenes.
         waitForDates();
     }
 
     /**
      * Method to wait for the user to select the start and end dates.
+     * Uses a separate thread to wait for the user to select the dates before setting the fields and creating the next
+     * scenes.
      */
-    public void waitForDates() {
+    private void waitForDates() {
         new Thread(() -> {
             while (welcomeController.getFromDate() == null || welcomeController.getToDate() == null) {
                 try {
@@ -89,7 +92,8 @@ public class SceneInitialiser {
             startDate = welcomeController.getFromDate();
             endDate = welcomeController.getToDate();
             numberOfUpdates++;
-            //Create other scenes once dates have been chosen by the user on the JavaFX thread.
+
+            // Create other scenes once dates have been chosen by the user on the JavaFX thread.
             Platform.runLater(() -> {
                 createMapScene();
                 createStatisticsScene();
@@ -101,13 +105,13 @@ public class SceneInitialiser {
     /**
      * Method to update the scenes when the user changes the selected date range.
      * <p>
-     * Remove the map and statistics scenes from the scenes map and wait until dates are set to create the other
+     * Remove the map, statistics, and graph scenes from the scenes map and wait until dates are set to create the other
      * application scenes.
      */
     public void updateScenes() {
-        scenes.remove("map");
-        scenes.remove("stats");
-        scenes.remove("graph");
+        SCENES.remove("map");
+        SCENES.remove("stats");
+        SCENES.remove("graph");
         waitForDates();
     }
 
@@ -124,7 +128,7 @@ public class SceneInitialiser {
         mapController.beginLoading();
         Scene mapScene = mapController.getScene();
 
-        scenes.put("map", mapScene);
+        SCENES.put("map", mapScene);
     }
 
     /**
@@ -140,7 +144,7 @@ public class SceneInitialiser {
         statisticsController.beginLoading();
         Scene statisticsScene = statisticsController.getScene();
 
-        scenes.put("stats", statisticsScene);
+        SCENES.put("stats", statisticsScene);
     }
 
     /**
@@ -156,6 +160,6 @@ public class SceneInitialiser {
         graphController.beginLoading();
         Scene graphScene = graphController.getScene();
 
-        scenes.put("graph", graphScene);
+        SCENES.put("graph", graphScene);
     }
 }

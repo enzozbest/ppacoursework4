@@ -21,9 +21,10 @@ import utils.CovidData;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
- * BoroughController class is responsible for displaying all the data of a specific borough.
+ * The BoroughController class is responsible for displaying all the data of a specific borough.
  * <p>
  * This class is used to control the screen shown to the user after they click "View Borough" on the Map screen.
  * It displays a table of data for a specific borough in a table format, showing the user the data for each day
@@ -34,15 +35,12 @@ import java.time.LocalDate;
  * CSS styles are applied to the table to make it more visually appealing and to make the Borough View screen consistent
  * with the design of the rest of the application.
  *
- * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
-@SuppressWarnings("rawtypes, unchecked")
 public class BoroughController extends AbstractController {
 
     private final String boroughName;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
     private final Stage boroughView;
     @FXML
     private ImageView background;
@@ -71,10 +69,7 @@ public class BoroughController extends AbstractController {
                 "ORDER BY `date` ASC;");
 
         this.boroughName = boroughName;
-        this.startDate = startDate;
-        this.endDate = endDate;
         this.boroughView = new Stage();
-        this.processQuery();
     }
 
     /**
@@ -85,23 +80,31 @@ public class BoroughController extends AbstractController {
      */
     @Override
     public void beginLoading() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/borough-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/fxml/borough-view.fxml"));
         loader.setController(this);
+
         try {
             parent = loader.load();
         } catch (IOException e) {
-            System.out.println("E");
+            System.out.println("Error loading borough view fxml file" + e.getMessage() + e.getCause());
         }
 
-        parent.getStylesheets().add(getClass().getResource("../../resources/styles/table-view.css").toExternalForm());
-        parent.getStylesheets().add(getClass().getResource("../../resources/styles/default.css").toExternalForm());
+        parent.getStylesheets().add(Objects.requireNonNull(getClass()
+                .getResource("../../resources/styles/table-view.css")).toExternalForm());
+        parent.getStylesheets().add(Objects.requireNonNull(getClass()
+                .getResource("../../resources/styles/default.css")).toExternalForm());
 
-        this.prepareScene();
+        super.runBackgroundTask(super.queryDatabase(), () -> {
+            this.processQuery();
+            this.prepareScene();
+
+            this.prepareStage();
+        });
+
         scene = new Scene(parent, 1450, 600, Paint.valueOf("white"));
-
-        this.prepareStage();
-
         boroughView.show();
+
+
     }
 
     /**
@@ -135,9 +138,10 @@ public class BoroughController extends AbstractController {
      * Method to set up the TableView for the Borough View screen.
      * <p>
      * This method is called when the BoroughController is created.
-     * It sets up the TableView with the columns for each data field, and populates the TableView with the CovidData objects.
-     * The TableView is made editable so that the user can order the data by clicking on the column headers.
-     * The TableView is styled using CSS to make it visually appealing and consistent with the design of the rest of the application.
+     * It sets up the TableView with the columns for each data field, and populates the TableView with the CovidData
+     * objects. The TableView is made editable so that the user can order the data by clicking on the column headers.
+     * The TableView is styled using CSS to make it visually appealing and consistent with the design of the rest of the
+     * application.
      */
     private void setTableView() {
         table_view.setEditable(true);
@@ -192,8 +196,9 @@ public class BoroughController extends AbstractController {
      * It populates the TableView with the CovidData objects generated from the database query.
      * The PropertyValueFactory is used to bind the data fields of the CovidData objects to the columns in the TableView.
      * This allows the TableView to display the data in the CovidData objects in the correct columns.
-     * The PropertyValueFactory also allows the TableView to be editable, so that the user can order the data by clicking on the column headers.
-     * The TableView is styled using CSS to make it visually appealing and consistent with the design of the rest of the application.
+     * The PropertyValueFactory also allows the TableView to be editable, so that the user can order the data by clicking
+     * on the column headers. The TableView is styled using CSS to make it visually appealing and consistent with the
+     * design of the rest of the application.
      */
     private void populateTableView() {
         date.setCellValueFactory(new PropertyValueFactory<CovidData, String>("dateProperty"));
@@ -245,10 +250,12 @@ public class BoroughController extends AbstractController {
         records = FXCollections.observableArrayList();
         try {
             while (data.next()) {
-                records.add(new CovidData(data.getString("date"), data.getString("borough"), data.getInt("retail_and_recreation"),
-                        data.getInt("grocery_and_pharmacy"), data.getInt("parks"), data.getInt("transit_stations"),
-                        data.getInt("workplaces"), data.getInt("residential"), data.getInt("new_cases"),
-                        data.getInt("total_cases"), data.getInt("new_deaths"), data.getInt("total_deaths")));
+                records.add(new CovidData(data.getString("date"), data.getString("borough"),
+                        data.getInt("retail_and_recreation"), data.getInt("grocery_and_pharmacy"),
+                        data.getInt("parks"), data.getInt("transit_stations"),
+                        data.getInt("workplaces"), data.getInt("residential"),
+                        data.getInt("new_cases"), data.getInt("total_cases"),
+                        data.getInt("new_deaths"), data.getInt("total_deaths")));
             }
         } catch (SQLException e) {
             System.out.println("Error generating covid records");

@@ -19,13 +19,13 @@ import java.util.concurrent.ExecutionException;
  * Abstract class to be extended by all Controllers in the application.
  * <p>
  * This class provides the basic functionality for all controllers in the application. It provides the ability to query
- * the database, set mouse events for the forward and back buttons, and add click events to image views. It also provides
- * the ability to flash an image view when the mouse hovers over it.
+ * the database, set mouse events for the forward and back buttons, and add click events to nodes. It also provides the
+ * ability to flash a node when the mouse hovers over it, or indefinitely.
  * <p>
  * This class is abstract and should not be instantiated directly. It is designed to be extended by other classes.
  *
- * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
- * @version 2024.03.27
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
+ * @version 2024.03.28
  */
 public abstract class AbstractController implements Controller {
 
@@ -58,10 +58,14 @@ public abstract class AbstractController implements Controller {
      * from the buttons. This is used to change the behaviour of the buttons when the user is navigating between
      * different scenes.
      *
-     * @param setting Whether to add or remove the mouse events
+     * @param addEventFlag true to add mouse events, false to remove events
+     * @param back         the back button
+     * @param forward      the forward button
+     * @param backScene    the scene to change to when the back button is clicked
+     * @param forwardScene the scene to change to when the forward button is clicked
      */
-    protected void setNavigationEvents(boolean setting, Node back, Node forward, String backScene, String forwardScene) {
-        if (setting) {
+    protected void setNavigationEvents(boolean addEventFlag, Node back, Node forward, String backScene, String forwardScene) {
+        if (addEventFlag) {
             this.addClickEvent(back, backScene);
             this.addClickEvent(forward, forwardScene);
             return;
@@ -73,18 +77,14 @@ public abstract class AbstractController implements Controller {
     }
 
     /**
-     * Method to add the click event to the image view.
+     * Method to add click event handler to a node.
      * <p>
-     * This method adds the click event to the image view by setting the on mouse clicked event to change the scene
-     * to the next scene.
-     *
-     * @param node      The image view to add the click event to
-     * @param nextScene The next scene to change to
+     * This method adds the click event handler to change the scene to the next scene.
      */
     private void addClickEvent(Node node, String nextScene) {
         node.setOnMouseClicked(mouseEvent -> {
             Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-            Scene scene = SceneInitialiser.scenes.get(nextScene);
+            Scene scene = SceneInitialiser.SCENES.get(nextScene);
             stage.setScene(scene);
             scene.setCursor(Cursor.DEFAULT);
             scene.getRoot().setCursor(Cursor.DEFAULT);
@@ -114,7 +114,7 @@ public abstract class AbstractController implements Controller {
     /**
      * Method to indefinitely flash a node.
      * <p>
-     * This method creates a fade transition to flash the node indefinitely. The transition is played indefinitely.
+     * This method creates a fade transition to flash the node indefinitely.
      *
      * @param node The node to flash
      */
@@ -129,9 +129,6 @@ public abstract class AbstractController implements Controller {
      * <p>
      * This method creates a fade transition for the specified node. The transition is set to fade from 1.0 to 0.3 and
      * back to 1.0. The duration of the transition is set to 1150 milliseconds.
-     *
-     * @param node The node to create the fade transition for
-     * @return The fade transition
      */
     private FadeTransition createFadeTransition(Node node) {
         FadeTransition transition = new FadeTransition(Duration.millis(1150), node);
@@ -141,8 +138,16 @@ public abstract class AbstractController implements Controller {
         return transition;
     }
 
+    /**
+     * Method to run a background task.
+     * <p>
+     * This method runs a background task using the provided task object. It then sets the data from the task to the
+     * data field of the controller. Finally, it runs the onSucceeded runnable.
+     *
+     * @param task        the task to run
+     * @param onSucceeded the runnable to run when the task is succeeded
+     */
     protected void runBackgroundTask(Task<ResultSet> task, Runnable onSucceeded) {
-
         task.setOnSucceeded(event -> {
             try {
                 data = task.get();
@@ -155,57 +160,55 @@ public abstract class AbstractController implements Controller {
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
+    }
 
+    /**
+     * Method to create a task.
+     * <p>
+     * This method creates a task using the provided query object. The task runs the query in the background and returns
+     * the result set from the query.
+     */
+    private Task<ResultSet> createTask(Query query) {
+        return new Task<>() {
+            @Override
+            protected ResultSet call() {
+                try {
+                    ResultSet ret = new QueryExecutor(query).runQuery().get();
+                    return ret;
+                } catch (InterruptedException | ExecutionException e) {
+                    System.out.println("Error processing background thread" + e.getMessage() + e.getCause());
+                }
+                return null;
+            }
+        };
     }
 
     /**
      * Method to query the database.
      * <p>
-     * This method queries the database using the provided query object. It then returns the result set from the query.
+     * This method queries the database using the query object passed at construction.
      *
-     * @return The result set from the query
+     * @return A task that will return the result set from the query.
      */
     protected Task<ResultSet> queryDatabase() {
-        Task<ResultSet> task = new Task<>() {
-            @Override
-            protected ResultSet call() {
-                try {
-                    ResultSet ret = new QueryExecutor(query).runQuery().get();
-                    return ret;
-                } catch (InterruptedException | ExecutionException e) {
-                    System.out.println("Error processing background thread" + e.getMessage() + e.getCause());
-                }
-                return null;
-            }
-        };
-        return task;
+        return createTask(query);
     }
 
     /**
      * Method to query the database.
      * <p>
-     * This method queries the database using the provided query object. It then returns the result set from the query.
+     * This method queries the database using the provide query object.
      *
-     * @return The result set from the query
+     * @return A task that will return the result set from the query.
      */
     protected Task<ResultSet> queryDatabase(Query query) {
-        Task<ResultSet> task = new Task<>() {
-            @Override
-            protected ResultSet call() {
-                try {
-                    ResultSet ret = new QueryExecutor(query).runQuery().get();
-                    return ret;
-                } catch (InterruptedException | ExecutionException e) {
-                    System.out.println("Error processing background thread" + e.getMessage() + e.getCause());
-                }
-                return null;
-            }
-        };
-        return task;
+        return createTask(query);
     }
 
     /**
-     * @return The scene represented by the Controller
+     * Method to get the scene controlled by the Controller.
+     *
+     * @return The scene controlled by the Controller
      */
     public Scene getScene() {
         return scene;

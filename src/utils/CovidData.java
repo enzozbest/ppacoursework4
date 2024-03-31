@@ -7,16 +7,15 @@ import javafx.beans.property.StringProperty;
 
 
 /**
- * This record class represents one record in the London Covid-19 dataset.
+ * This class represents one record in the London Covid-19 dataset.
  * This is essentially one row in the data table as a Java object. Each column of the table
  * has a corresponding field.
  *
- * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
 
 public class CovidData {
-
 
     private final StringProperty dateProperty;
     private final StringProperty boroughProperty;

@@ -10,7 +10,7 @@ import java.sql.DriverManager;
  * The connect method is public and static so it can be called without creating an instance of the class anywhere in
  * this application.
  *
- * @author Enzo Bestetti (K23011872)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
 public class DatabaseConnector {
@@ -24,7 +24,8 @@ public class DatabaseConnector {
     public static Connection connect() {
         Connection conn = null;
         try {
-            conn = DriverManager.getConnection("jdbc:mysql:aws://ppa-coursework-4.cn2gi2oeogwn.eu-west-1.rds.amazonaws.com:3306/covid_london_db",
+            conn = DriverManager.getConnection(
+                    "jdbc:mysql:aws://ppa-coursework-4.cn2gi2oeogwn.eu-west-1.rds.amazonaws.com:3306/covid_london_db",
                     "admin", "enzobestetti");
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage() + "\n Could not connect to the database.");

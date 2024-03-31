@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutionException;
  * delineated to the user. The boroughs are coloured based on the percentage of deaths in each borough for the selected
  * date range.
  * <p>
- * The user can  hover over a borough to view the name of the borough, the total number of cases, and the number of
+ * The user can hover over a borough to view the name of the borough, the total number of cases, and the number of
  * deaths. The borough is highlighted in black when hovered over, as well as being enlarged.
  * <p>
  * If a borough is clicked, the enlargement on hover effect for the other boroughs is disabled. The basic data for the clicked
@@ -46,10 +46,9 @@ import java.util.concurrent.ExecutionException;
  * The user can navigate between this panel and the other panels in the application by using the navigation buttons
  * in the bottom left corner of the screen.
  *
- * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902)
+ * @author Enzo Bestetti (K23011872), Krystian Augustynowicz (K23000902), Jacelyne Tan (K23085324)
  * @version 2024.03.27
  */
-@SuppressWarnings("rawtypes")
 public class MapController extends AbstractController {
 
     @FXML
@@ -95,7 +94,7 @@ public class MapController extends AbstractController {
      */
     @Override
     public void beginLoading() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/map-frame.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("../../resources/fxml/map-frame.fxml"));
         loader.setController(this);
 
         try {
@@ -161,7 +160,6 @@ public class MapController extends AbstractController {
         select_location.setPreserveRatio(true);
     }
 
-
     /**
      * Method to set the back button.
      * <p>
@@ -186,11 +184,9 @@ public class MapController extends AbstractController {
 
     /**
      * Method to set the mouse events for the forward and back buttons.
-     *
-     * @param setting Whether to add or remove the mouse events
      */
-    private void setMouseEvents(boolean setting) {
-        if (setting) {
+    private void setMouseEvents(boolean setEventsFlag) {
+        if (setEventsFlag) {
             super.setNavigationEvents(true, back_text, forward_text, "welcome", "stats");
             return;
         }
@@ -261,13 +257,9 @@ public class MapController extends AbstractController {
 
     /**
      * Method to set the click event for the boroughs on the map.
-     *
-     * @param boroughBoundary The SVG path for the borough
-     * @param boroughName     The name of the borough
      */
     private void setBoroughClickEvent(SVGPath boroughBoundary, String boroughName) {
         boroughBoundary.setOnMouseClicked(event -> {
-
             this.disableHover();
 
             boroughBoundary.getStyleClass().add("clicked");
@@ -288,15 +280,8 @@ public class MapController extends AbstractController {
      * Method to create the borough view.
      * <p>
      * This method creates the borough view by creating a new instance of the BoroughController class and calling the
-     * beginLoading method.
-     * <p>
-     * The borough view is then displayed to the user.
-     * <p>
+     * beginLoading method. The borough view is then displayed to the user.
      * The borough view displays the data for the selected borough for the selected date range.
-     *
-     * @param boroughName The name of the borough
-     * @param startDate   The start date of the date range
-     * @param endDate     The end date of the date range
      */
     private void createBoroughView(String boroughName, LocalDate startDate, LocalDate endDate) {
         BoroughController controller = new BoroughController(boroughName, startDate, endDate);
@@ -305,8 +290,6 @@ public class MapController extends AbstractController {
 
     /**
      * Method to send every borough apart from the one whose id is passed as a parameter to the back.
-     *
-     * @param id The id of the borough to send to the front
      */
     private void setStylesOtherBoroughs(String id) {
         ArrayList<String> ids = new ArrayList<>();
@@ -329,10 +312,6 @@ public class MapController extends AbstractController {
 
     /**
      * Method to set the hover event for the boroughs on the map.
-     *
-     * @param setting         Whether to add or remove the hover event
-     * @param boroughBoundary The SVG path for the borough
-     * @param boroughName     The name of the borough
      */
     private void setBoroughHoverEvent(boolean setting, SVGPath boroughBoundary, String boroughName) {
         if (setting) {
@@ -379,6 +358,9 @@ public class MapController extends AbstractController {
         }
     }
 
+    /**
+     * Method to get the number of deaths in the selected date range.
+     */
     private void getPeriodDeaths() {
         Query query = new Query("SELECT sum(new_deaths) as period_deaths FROM covid_london WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "'");
 
@@ -431,9 +413,6 @@ public class MapController extends AbstractController {
      * 2-3% deaths: orange
      * 3-4% deaths: red
      * 4%+ deaths: dark red
-     *
-     * @param death_percentage The number of deaths in the borough
-     * @return The hex code for the colour of the borough
      */
     private String findColour(double death_percentage) {
         if (0 <= death_percentage && death_percentage < 0.01) {
