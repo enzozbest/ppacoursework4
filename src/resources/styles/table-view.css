@@ -1,0 +1,30 @@
+.table-view .column-header,
+.table-view .column-header .filler,
+.table-view .column-header-background .filler {
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-family: "Retro Gaming";
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+}
+
+.table-view .table-cell {
+    -fx-alignment: center;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-width: 0.5;
+    -fx-border-color: white;
+}
+
+.table-cell {
+    -fx-font-family: "Retro Gaming";
+    -fx-text-fill: white;
+}
+
+
+.table-cell:hover {
+    -fx-background-color: #93f9b911;
+    -fx-text-background-color: red;
+}

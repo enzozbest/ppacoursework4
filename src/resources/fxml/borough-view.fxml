@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxWidth="1450.0" prefHeight="560.0" prefWidth="1450.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <ImageView fx:id="background" fitHeight="560.0" fitWidth="1450.0" layoutY="3.0" pickOnBounds="true" preserveRatio="true" />
+        <Label fx:id="title" layoutX="15.0" layoutY="3.0" prefHeight="40.0" prefWidth="1420.0" scaleX="1.5" scaleY="2.5" style="-fx-alignment: center; -fx-font-family: &quot;Retro Gaming&quot;; -fx-text-fill: white;" text="Label" textAlignment="CENTER" />
+      <Text fx:id="close_button" layoutX="1351.0" layoutY="508.0" scaleX="1.3" scaleY="1.3" strokeType="OUTSIDE" strokeWidth="0.0" style="-fx-font-family: &quot;Retro Gaming&quot;; -fx-fill: white;" text="Back" textAlignment="CENTER" />
+        <TableView fx:id="table_view" layoutX="10.0" layoutY="68.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="400.0" prefWidth="1430.0" />
+    </children>
+</AnchorPane>

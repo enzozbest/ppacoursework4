@@ -1,0 +1,12 @@
+.clickable {
+    -fx-font-size: 18px;
+}
+
+.clickable:hover {
+    -fx-cursor: hand;
+}
+
+#statistic_container Label {
+    -fx-text-fill: derive(#1476f2, -7%);
+    -fx-font-family: "Retro Gaming";
+}
